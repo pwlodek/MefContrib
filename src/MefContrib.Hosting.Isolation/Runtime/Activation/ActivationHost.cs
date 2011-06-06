@@ -39,8 +39,14 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
             return Hosts.Single(t => t.Description == objectReference.Description);
         }
 
-        public static IPartActivationHost CreateActivatorHost(IsolationLevel isolationLevel, string groupName)
+        public static IPartActivationHost CreateActivatorHost(IIsolationMetadata isolationMetadata)
         {
+            var groupName = isolationMetadata.IsolationGroup;
+            if (isolationMetadata.HostPerInstance)
+            {
+                groupName = Guid.NewGuid().ToString();
+            }
+
             var activationHost = Hosts.FirstOrDefault(t => t.Description.Group == groupName);
             if (activationHost != null)
             {
@@ -50,7 +56,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
             var description = new ActivationHostDescription(groupName);
             IPartActivationHost host;
 
-            switch (isolationLevel)
+            switch (isolationMetadata.Isolation)
             {
                 case IsolationLevel.None:
                     host = new CurrentAppDomainPartActivationHost(description);

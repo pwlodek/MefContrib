@@ -19,31 +19,31 @@ namespace MefContrib.Hosting.Isolation
             }
         }
 
-        public static TContract CreateInstance<TContract, TImplementation>(IsolationLevel isolationLevel, string groupName)
+        public static TContract CreateInstance<TContract, TImplementation>(IIsolationMetadata isolationMetadata)
             where TImplementation : TContract
         {
             var contractType = typeof (TContract);
             var implementationType = typeof (TImplementation);
 
-            return (TContract) CreateInstance(contractType, implementationType, isolationLevel, groupName);
+            return (TContract) CreateInstance(contractType, implementationType, isolationMetadata);
         }
         
-        public static object CreateInstance(Type implementationType, IsolationLevel isolationLevel, string groupName)
+        public static object CreateInstance(Type implementationType, IIsolationMetadata isolationMetadata)
         {
             var interfaces = implementationType.GetInterfaces();
             var contractType = interfaces.First();
 
-            return CreateInstance(contractType, implementationType, isolationLevel, groupName);
+            return CreateInstance(contractType, implementationType, isolationMetadata);
         }
 
-        public static object CreateInstance(Type contractType, Type implementationType, IsolationLevel isolationLevel, string groupName)
+        public static object CreateInstance(Type contractType, Type implementationType, IIsolationMetadata isolationMetadata)
         {
             var assembly = implementationType.Assembly.FullName;
             var typeName = implementationType.FullName;
             var interfaces = implementationType.GetInterfaces();
             var additionalInterfaces = interfaces.Where(t => t != contractType).ToArray();
 
-            var activatorHost = ActivationHost.CreateActivatorHost(isolationLevel, groupName);
+            var activatorHost = ActivationHost.CreateActivatorHost(isolationMetadata);
             var activator = activatorHost.GetActivator();
 
             var reference = activator.ActivateInstance(activatorHost.Description, assembly, typeName);

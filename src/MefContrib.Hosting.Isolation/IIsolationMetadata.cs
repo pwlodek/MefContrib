@@ -4,6 +4,8 @@ namespace MefContrib.Hosting.Isolation
     {
         IsolationLevel Isolation { get; }
 
+        bool HostPerInstance { get; }
+
         string IsolationGroup { get; }
     }
 }

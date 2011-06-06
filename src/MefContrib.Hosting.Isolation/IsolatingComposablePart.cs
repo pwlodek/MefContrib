@@ -27,7 +27,7 @@ namespace MefContrib.Hosting.Isolation
             var memberInfo = ReflectionModelServices.GetExportingMember(definition);
             var type = (Type) memberInfo.GetAccessors()[0];
             var metadata = AttributedModelServices.GetMetadataView<IIsolationMetadata>(definition.Metadata);
-            var partProxy = PartHost.CreateInstance(type, metadata.Isolation, metadata.IsolationGroup);
+            var partProxy = PartHost.CreateInstance(type, metadata);
 
             _values[definition] = partProxy;
 
