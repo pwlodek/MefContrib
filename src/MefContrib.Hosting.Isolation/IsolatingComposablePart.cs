@@ -27,8 +27,7 @@ namespace MefContrib.Hosting.Isolation
             var memberInfo = ReflectionModelServices.GetExportingMember(definition);
             var type = (Type) memberInfo.GetAccessors()[0];
             var metadata = AttributedModelServices.GetMetadataView<IIsolationMetadata>(definition.Metadata);
-            var isolationLevel = metadata.Isolation;
-            var partProxy = PartHost.CreateInstance(type, isolationLevel);
+            var partProxy = PartHost.CreateInstance(type, metadata.Isolation, metadata.IsolationGroup);
 
             _values[definition] = partProxy;
 

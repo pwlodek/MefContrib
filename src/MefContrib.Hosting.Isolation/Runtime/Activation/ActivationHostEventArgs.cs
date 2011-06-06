@@ -4,11 +4,16 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
 {
     public class ActivationHostEventArgs : EventArgs
     {
-        public Guid ActivatorHostId { get; private set; }
+        public ActivationHostDescription Description { get; private set; }
 
-        public ActivationHostEventArgs(Guid activatorHostId)
+        public ActivationHostEventArgs(ActivationHostDescription description)
         {
-            ActivatorHostId = activatorHostId;
+            if (description == null)
+            {
+                throw new ArgumentNullException("description");
+            }
+
+            Description = description;
         }
     }
 }

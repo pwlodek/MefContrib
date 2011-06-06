@@ -8,5 +8,7 @@ namespace MefContrib.Hosting.Isolation
     public class IsolationAttribute : Attribute, IIsolationMetadata
     {
         public IsolationLevel Isolation { get; set; }
+
+        public string IsolationGroup { get; set; }
     }
 }

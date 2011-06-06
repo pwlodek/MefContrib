@@ -24,5 +24,7 @@ namespace MefContrib.Hosting.Isolation
         }
 
         public IsolationLevel Isolation { get; set; }
+
+        public string IsolationGroup { get; set; }
     }
 }

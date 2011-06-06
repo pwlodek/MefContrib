@@ -51,9 +51,11 @@
     <Compile Include="IsolationLevel.cs" />
     <Compile Include="PartHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Runtime\Activation\ActivationException.cs" />
+    <Compile Include="Runtime\Activation\ActivationHostException.cs" />
     <Compile Include="Runtime\Activation\ActivationHost.cs" />
+    <Compile Include="Runtime\Activation\ActivationHostDescription.cs" />
     <Compile Include="Runtime\Activation\ActivationHostEventArgs.cs" />
+    <Compile Include="Runtime\Activation\Hosts\PartActivationHostBase.cs" />
     <Compile Include="Runtime\Activation\InvokeException.cs" />
     <Compile Include="Runtime\Activation\Hosts\CurrentAppDomainPartActivationHost.cs" />
     <Compile Include="Runtime\Activation\Hosts\IPartActivationHost.cs" />

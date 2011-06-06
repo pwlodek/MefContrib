@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ServiceModel;
+using MefContrib.Hosting.Isolation.Runtime.Activation;
 
 namespace MefContrib.Hosting.Isolation.Runtime
 {
@@ -14,7 +15,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
         void HeartBeat();
 
         [OperationContract]
-        ObjectReference ActivateInstance(Guid activatorHostId, string assembly, string type);
+        ObjectReference ActivateInstance(ActivationHostDescription description, string assembly, string type);
 
         [OperationContract]
         object InvokeMember(ObjectReference objectReference, string name, List<RuntimeArgument> arguments);

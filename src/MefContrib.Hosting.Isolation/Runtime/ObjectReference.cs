@@ -1,23 +1,26 @@
 using System;
+using MefContrib.Hosting.Isolation.Runtime.Activation;
 
 namespace MefContrib.Hosting.Isolation.Runtime
 {
     [Serializable]
     public class ObjectReference : IEquatable<ObjectReference>
     {
-        private readonly Guid _activatorHostId;
+        
         private Guid _guid;
 
-        public ObjectReference(Guid activatorHostId)
+        public ObjectReference(ActivationHostDescription description)
         {
-            _activatorHostId = activatorHostId;
+            if (description == null)
+            {
+                throw new ArgumentNullException("description");
+            }
+            
+            Description = description;
             _guid = Guid.NewGuid();
         }
 
-        public Guid ActivatorHostId
-        {
-            get { return _activatorHostId; }
-        }
+        public ActivationHostDescription Description { get; private set; }
 
         public bool Equals(ObjectReference other)
         {

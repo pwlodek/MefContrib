@@ -4,21 +4,21 @@ using System.Runtime.Serialization;
 namespace MefContrib.Hosting.Isolation.Runtime.Activation
 {
     [Serializable]
-    public class ActivationException : Exception
+    public class ActivationHostException : Exception
     {
-        public ActivationException()
+        public ActivationHostException()
         {
         }
 
-        public ActivationException(string message) : base(message)
+        public ActivationHostException(string message) : base(message)
         {
         }
 
-        public ActivationException(string message, Exception inner) : base(message, inner)
+        public ActivationHostException(string message, Exception inner) : base(message, inner)
         {
         }
 
-        protected ActivationException(
+        protected ActivationHostException(
             SerializationInfo info,
             StreamingContext context) : base(info, context)
         {

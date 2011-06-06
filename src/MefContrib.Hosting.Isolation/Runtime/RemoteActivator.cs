@@ -4,6 +4,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
+using MefContrib.Hosting.Isolation.Runtime.Activation;
 
 namespace MefContrib.Hosting.Isolation.Runtime
 {
@@ -19,7 +20,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
         {
         }
 
-        public ObjectReference ActivateInstance(Guid activatorHostId, string assemblyName, string typeName)
+        public ObjectReference ActivateInstance(ActivationHostDescription description, string assemblyName, string typeName)
         {
             var assembly = Assembly.Load(assemblyName);
             var type = assembly.GetTypes().Where(t => t.FullName == typeName).FirstOrDefault();
@@ -35,7 +36,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
             var contract = (string)_initialized[type].Parts.First().ExportDefinitions.First().Metadata["ExportTypeIdentity"];
             var instance = _container.GetExports(typeof (object), null, contract).FirstOrDefault();
 
-            var reference = new ObjectReference(activatorHostId);
+            var reference = new ObjectReference(description);
             _map[reference] = instance.Value;
 
             return reference;

@@ -4,7 +4,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
     public interface IPartActivationHost
     {
-        Guid Id { get; }
+        ActivationHostDescription Description { get; }
 
         void Start();
 

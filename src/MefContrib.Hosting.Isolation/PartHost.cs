@@ -15,38 +15,38 @@ namespace MefContrib.Hosting.Isolation
         {
             if (Failure != null)
             {
-                Failure(host, new ActivationHostEventArgs(host.Id));
+                Failure(host, new ActivationHostEventArgs(host.Description));
             }
         }
 
-        public static TContract CreateInstance<TContract, TImplementation>(IsolationLevel isolationLevel)
+        public static TContract CreateInstance<TContract, TImplementation>(IsolationLevel isolationLevel, string groupName)
             where TImplementation : TContract
         {
             var contractType = typeof (TContract);
             var implementationType = typeof (TImplementation);
 
-            return (TContract) CreateInstance(contractType, implementationType, isolationLevel);
+            return (TContract) CreateInstance(contractType, implementationType, isolationLevel, groupName);
         }
         
-        public static object CreateInstance(Type implementationType, IsolationLevel isolationLevel)
+        public static object CreateInstance(Type implementationType, IsolationLevel isolationLevel, string groupName)
         {
             var interfaces = implementationType.GetInterfaces();
             var contractType = interfaces.First();
 
-            return CreateInstance(contractType, implementationType, isolationLevel);
+            return CreateInstance(contractType, implementationType, isolationLevel, groupName);
         }
 
-        public static object CreateInstance(Type contractType, Type implementationType, IsolationLevel isolationLevel)
+        public static object CreateInstance(Type contractType, Type implementationType, IsolationLevel isolationLevel, string groupName)
         {
             var assembly = implementationType.Assembly.FullName;
             var typeName = implementationType.FullName;
             var interfaces = implementationType.GetInterfaces();
             var additionalInterfaces = interfaces.Where(t => t != contractType).ToArray();
 
-            var activatorHost = ActivationHost.CreateActivatorHost(isolationLevel);
+            var activatorHost = ActivationHost.CreateActivatorHost(isolationLevel, groupName);
             var activator = activatorHost.GetActivator();
 
-            var reference = activator.ActivateInstance(activatorHost.Id, assembly, typeName);
+            var reference = activator.ActivateInstance(activatorHost.Description, assembly, typeName);
 
             RemotingServices.CloseActivator(activator);
 

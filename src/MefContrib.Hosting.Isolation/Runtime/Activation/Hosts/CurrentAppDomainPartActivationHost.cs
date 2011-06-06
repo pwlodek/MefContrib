@@ -3,22 +3,17 @@ using System.ServiceModel;
 
 namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
-    public class CurrentAppDomainPartActivationHost : IPartActivationHost
+    public class CurrentAppDomainPartActivationHost : PartActivationHostBase
     {
         private readonly ServiceHost _serviceHost;
-        private readonly string _address;
 
-        public CurrentAppDomainPartActivationHost()
+        public CurrentAppDomainPartActivationHost(ActivationHostDescription description) 
+            : base(description)
         {
-            Id = Guid.NewGuid();
-
-            _address = string.Concat(RemotingServices.BaseAddress, Id);
-            _serviceHost = RemotingServices.CreateServiceHost(_address);
+            _serviceHost = RemotingServices.CreateServiceHost(Address);
         }
-
-        public Guid Id { get; private set; }
         
-        public void Start()
+        public override void Start()
         {
             if (_serviceHost.State != CommunicationState.Created)
             {
@@ -26,18 +21,11 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
             }
 
             _serviceHost.Open();
-
-            Console.WriteLine("Started in AppDomain: " + AppDomain.CurrentDomain.FriendlyName);
         }
 
-        public void Stop()
+        public override void Stop()
         {
             _serviceHost.Close();
-        }
-
-        public IRemoteActivator GetActivator()
-        {
-            return RemotingServices.CreateActivator(_address);
         }
     }
 }

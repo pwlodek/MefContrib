@@ -8,7 +8,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
 {
     public static class ActivationHost
     {
-        private static readonly List<IPartActivationHost> Activators = new List<IPartActivationHost>();
+        private static readonly List<IPartActivationHost> Hosts = new List<IPartActivationHost>();
 
         static ActivationHost()
         {
@@ -17,7 +17,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
 
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
-            foreach (var activatorHost in Activators)
+            foreach (var activatorHost in Hosts)
             {
                 try
                 {
@@ -31,41 +31,50 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
   
         public static IRemoteActivator GetActivator(ObjectReference objectReference)
         {
-            return Activators.Single(t => t.Id == objectReference.ActivatorHostId).GetActivator();
+            return Hosts.Single(t => t.Description == objectReference.Description).GetActivator();
         }
 
         public static IPartActivationHost GetActivatorHost(ObjectReference objectReference)
         {
-            return Activators.Single(t => t.Id == objectReference.ActivatorHostId);
+            return Hosts.Single(t => t.Description == objectReference.Description);
         }
 
-        public static IPartActivationHost CreateActivatorHost(IsolationLevel isolationLevel)
+        public static IPartActivationHost CreateActivatorHost(IsolationLevel isolationLevel, string groupName)
         {
+            var activationHost = Hosts.FirstOrDefault(t => t.Description.Group == groupName);
+            if (activationHost != null)
+            {
+                return activationHost;
+            }
+
+            var description = new ActivationHostDescription(groupName);
             IPartActivationHost host;
 
             switch (isolationLevel)
             {
                 case IsolationLevel.None:
-                    host = new CurrentAppDomainPartActivationHost();
+                    host = new CurrentAppDomainPartActivationHost(description);
                     break;
 
                 case IsolationLevel.AppDomain:
-                    host = new NewAppDomainPartActivationHost();
+                    host = new NewAppDomainPartActivationHost(description);
                     break;
 
                 case IsolationLevel.Process:
-                    host = new NewProcessPartActivationHost();
+                    host = new NewProcessPartActivationHost(description);
                     break;
 
                 default:
                     throw new InvalidOperationException();
             }
             
-            Activators.Add(host);
+            // Stash the reference to the host
+            Hosts.Add(host);
             
-            // start activator host
+            // Start activation host
             host.Start();
 
+            // Wait till hosts starts up, if this is taking too much time, throw an exception
             ThrowIfCannotConnect(host);
 
             return host;
@@ -89,17 +98,16 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
                 catch (Exception)
                 {
                     Thread.Sleep(currentWaitTimeMilis);
-                    currentWaitTimeMilis *= 2;
+                    currentWaitTimeMilis *= 2; // exponential backoff
                     success = false;
                     retryCount--;
-                    //RemotingServices.CloseActivator(activator);
                     activator = host.GetActivator();
                 }
             }
             
             if (!success)
             {
-                throw new ActivationException("Cannot start host.");
+                throw new ActivationHostException("Cannot start host.");
             }
 
             RemotingServices.CloseActivator(activator);
