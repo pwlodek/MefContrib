@@ -1,4 +1,6 @@
-﻿namespace MefContrib
+﻿using System.Collections.Generic;
+
+namespace MefContrib
 {
     using System;
     using System.ComponentModel.Composition;
@@ -195,6 +197,29 @@
             var name = definition.GetType().Name;
             return name == "ReflectionMemberImportDefinition" ||
                    name == "ReflectionParameterImportDefinition";
+        }
+
+        /// <summary>
+        /// Tries to retrieve strongly typed metadata.
+        /// </summary>
+        /// <typeparam name="TMetadataView"><see cref="Type"/> representing metadata view.</typeparam>
+        /// <param name="metadata">Weakly typed metadata.</param>
+        /// <returns>Metadata view instance.</returns>
+        public static TMetadataView TryGetMetadataView<TMetadataView>(IDictionary<string,object> metadata)
+        {
+            if (metadata == null)
+            {
+                throw new ArgumentNullException("metadata");
+            }
+
+            try
+            {
+                return AttributedModelServices.GetMetadataView<TMetadataView>(metadata);
+            }
+            catch (Exception)
+            {
+                return default(TMetadataView);
+            }
         }
     }
 }

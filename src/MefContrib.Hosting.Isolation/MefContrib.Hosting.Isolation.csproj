@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>7c0c02f5-5878-4e7a-98e4-b436702b9c7c</ProjectGuid>
+    <ProjectGuid>{C6AE61D7-F457-4163-9903-56A94A7C8C9C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MefContrib.Hosting.Isolation</RootNamespace>
@@ -31,17 +31,52 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LinFu.DynamicProxy">
+      <HintPath>..\..\dependencies\desktop\linfu\LinFu.DynamicProxy.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="IIsolationMetadata.cs" />
+    <Compile Include="IsolatingCatalog.cs" />
+    <Compile Include="IsolatingComposablePart.cs" />
+    <Compile Include="IsolatingComposablePartDefinition.cs" />
+    <Compile Include="IsolationAttribute.cs" />
+    <Compile Include="IsolationExportAttribute.cs" />
+    <Compile Include="IsolationLevel.cs" />
+    <Compile Include="PartHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runtime\Activation\ActivationException.cs" />
+    <Compile Include="Runtime\Activation\ActivationHost.cs" />
+    <Compile Include="Runtime\Activation\ActivationHostEventArgs.cs" />
+    <Compile Include="Runtime\Activation\InvokeException.cs" />
+    <Compile Include="Runtime\Activation\Hosts\CurrentAppDomainPartActivationHost.cs" />
+    <Compile Include="Runtime\Activation\Hosts\IPartActivationHost.cs" />
+    <Compile Include="Runtime\Activation\Hosts\NewAppDomainPartActivationHost.cs" />
+    <Compile Include="Runtime\Activation\Hosts\NewProcessPartActivationHost.cs" />
+    <Compile Include="Runtime\IRemoteActivator.cs" />
+    <Compile Include="Runtime\ObjectReference.cs" />
+    <Compile Include="Runtime\Proxies\IObjectReferenceAware.cs" />
+    <Compile Include="Runtime\Proxies\IProxyFactory.cs" />
+    <Compile Include="Runtime\Proxies\LinFuProxyFactory.cs" />
+    <Compile Include="Runtime\Proxies\LinFuProxy.cs" />
+    <Compile Include="Runtime\Proxies\ProxyFactory.cs" />
+    <Compile Include="Runtime\Proxies\ProxyServices.cs" />
+    <Compile Include="Runtime\RemoteActivator.cs" />
+    <Compile Include="Runtime\RemotingServices.cs" />
+    <Compile Include="Runtime\RuntimeArgument.cs" />
+    <Compile Include="Runtime\SerializationServices.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MefContrib\MefContrib.csproj">
+      <Project>{0CCE812A-F4EB-4379-B820-D8ADA4330235}</Project>
+      <Name>MefContrib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
