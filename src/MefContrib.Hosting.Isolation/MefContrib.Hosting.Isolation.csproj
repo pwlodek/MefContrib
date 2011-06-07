@@ -42,6 +42,9 @@
     <Reference Include="System.ServiceModel" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\MefContrib\Properties\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="IIsolationMetadata.cs" />
     <Compile Include="IsolatingCatalog.cs" />
     <Compile Include="IsolatingComposablePart.cs" />
@@ -50,7 +53,6 @@
     <Compile Include="IsolationExportAttribute.cs" />
     <Compile Include="IsolationLevel.cs" />
     <Compile Include="PartHost.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Runtime\Activation\ActivationHook.cs" />
     <Compile Include="Runtime\Activation\ActivationHostException.cs" />
     <Compile Include="Runtime\Activation\ActivationHost.cs" />
