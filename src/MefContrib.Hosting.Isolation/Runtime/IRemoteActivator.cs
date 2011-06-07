@@ -15,12 +15,15 @@ namespace MefContrib.Hosting.Isolation.Runtime
         void HeartBeat();
 
         [OperationContract]
+        [FaultContract(typeof(RemoteActivatorExceptionDetail))]
         ObjectReference ActivateInstance(ActivationHostDescription description, string assembly, string type);
 
         [OperationContract]
+        [FaultContract(typeof(RemoteActivatorExceptionDetail))]
         object InvokeMember(ObjectReference objectReference, string name, List<RuntimeArgument> arguments);
 
         [OperationContract]
+        [FaultContract(typeof(RemoteActivatorExceptionDetail))]
         void DeactivateInstance(ObjectReference objectReference);
     }
 }

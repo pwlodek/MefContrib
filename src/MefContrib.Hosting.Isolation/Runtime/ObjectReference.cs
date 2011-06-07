@@ -20,6 +20,11 @@ namespace MefContrib.Hosting.Isolation.Runtime
             _guid = Guid.NewGuid();
         }
 
+        /// <summary>
+        /// Indicates if the object is faulted. This can happen if an activation host crash.
+        /// </summary>
+        public bool Faulted { get; internal set; }
+
         public ActivationHostDescription Description { get; private set; }
 
         public bool Equals(ObjectReference other)
@@ -40,6 +45,11 @@ namespace MefContrib.Hosting.Isolation.Runtime
         public override int GetHashCode()
         {
             return _guid.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return _guid.ToString();
         }
 
         public static bool operator ==(ObjectReference left, ObjectReference right)

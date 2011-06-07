@@ -19,6 +19,11 @@ namespace MefContrib.Hosting.Isolation.Runtime
 
         public static void CloseActivator(IRemoteActivator activator)
         {
+            if (activator == null)
+            {
+                return;
+            }
+
             var communicationObject = (ICommunicationObject) activator;
             if (communicationObject.State != CommunicationState.Faulted)
             {

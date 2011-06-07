@@ -10,6 +10,22 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
             : base(description)
         {
             _domain = AppDomain.CreateDomain("Plugin_" + description.Id);
+
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+        }
+
+        void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            var senderDomain = (AppDomain) sender;
+            if (senderDomain.Id == _domain.Id)
+            {
+                // if already faulted, do nothing
+                if (!Faulted)
+                {
+                    Faulted = true;
+                    PartHost.OnFailure(this);
+                }
+            }
         }
         
         public override void Start()

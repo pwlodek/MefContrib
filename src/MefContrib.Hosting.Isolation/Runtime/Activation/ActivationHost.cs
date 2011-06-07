@@ -34,12 +34,17 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
             return Hosts.Single(t => t.Description == objectReference.Description).GetActivator();
         }
 
-        public static IPartActivationHost GetActivatorHost(ObjectReference objectReference)
+        public static IPartActivationHost GetActivationHost(ObjectReference objectReference)
         {
             return Hosts.Single(t => t.Description == objectReference.Description);
         }
 
-        public static IPartActivationHost CreateActivatorHost(IIsolationMetadata isolationMetadata)
+        public static IPartActivationHost GetActivationHost(ActivationHostDescription description)
+        {
+            return Hosts.Single(t => t.Description == description);
+        }
+
+        public static IPartActivationHost CreateActivationHost(IIsolationMetadata isolationMetadata)
         {
             var groupName = isolationMetadata.IsolationGroup;
             if (isolationMetadata.HostPerInstance)

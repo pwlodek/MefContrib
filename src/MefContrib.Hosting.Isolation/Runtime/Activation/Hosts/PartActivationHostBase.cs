@@ -24,9 +24,25 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 
         public abstract void Stop();
 
+        public bool Faulted { get; internal set; }
+
         public IRemoteActivator GetActivator()
         {
-            return RemotingServices.CreateActivator(Address);
+            if (Faulted)
+            {
+                throw new ActivationHostException("This host is faulted.");
+            }
+
+            try
+            {
+                var activator = RemotingServices.CreateActivator(Address);
+                return activator;
+            }
+            catch (Exception exception)
+            {
+                Faulted = true;
+                throw new ActivationHostException("Cannot create activator.", exception);
+            }
         }
     }
 }

@@ -23,61 +23,91 @@ namespace MefContrib.Hosting.Isolation.Runtime
 
         public ObjectReference ActivateInstance(ActivationHostDescription description, string assemblyName, string typeName)
         {
-            var assembly = Assembly.Load(assemblyName);
-            if (_assemblyInitialized.Contains(assembly) == false)
+            try
             {
-                var hooks = assembly.GetTypes().Where(t => typeof (ActivationHook).IsAssignableFrom(t));
-                foreach (var hook in hooks)
+                var assembly = Assembly.Load(assemblyName);
+                if (_assemblyInitialized.Contains(assembly) == false)
                 {
-                    try
+                    var hooks = assembly.GetTypes().Where(t => typeof(ActivationHook).IsAssignableFrom(t));
+                    foreach (var hook in hooks)
                     {
-                        var hookInstance = (ActivationHook)Activator.CreateInstance(hook);
-                        hookInstance.Initialize(_container, _aggregateCatalog);
+                        try
+                        {
+                            var hookInstance = (ActivationHook)Activator.CreateInstance(hook);
+                            hookInstance.Initialize(_container, _aggregateCatalog);
+                        }
+                        catch (Exception)
+                        {
+                        }
                     }
-                    catch (Exception)
-                    {
-                    }
+                    _assemblyInitialized.Add(assembly);
                 }
-                _assemblyInitialized.Add(assembly);
-            }
 
-            var type = assembly.GetTypes().Where(t => t.FullName == typeName).FirstOrDefault();
-            if (_initialized.ContainsKey(type) == false)
+                var type = assembly.GetTypes().Where(t => t.FullName == typeName).FirstOrDefault();
+                if (_initialized.ContainsKey(type) == false)
+                {
+                    var catalog = new TypeCatalog(type);
+                    _initialized.Add(type, catalog);
+                    _aggregateCatalog.Catalogs.Add(catalog);
+                }
+
+                var contract = (string)_initialized[type].Parts.First().ExportDefinitions.First().Metadata["ExportTypeIdentity"];
+                var instance = _container.GetExports(typeof(object), null, contract).FirstOrDefault();
+
+                var reference = new ObjectReference(description);
+                _map[reference] = instance.Value;
+
+                return reference;
+            }
+            catch (Exception exception)
             {
-                var catalog = new TypeCatalog(type);
-                _initialized.Add(type, catalog);
-                _aggregateCatalog.Catalogs.Add(catalog);
+                var message = string.Format("Error while activating part {0} from assembly {1}.", typeName, assemblyName);
+                throw new FaultException<RemoteActivatorExceptionDetail>(
+                    new RemoteActivatorExceptionDetail(exception) { Description = description },
+                    new FaultReason(message));
             }
-
-            var contract = (string)_initialized[type].Parts.First().ExportDefinitions.First().Metadata["ExportTypeIdentity"];
-            var instance = _container.GetExports(typeof (object), null, contract).FirstOrDefault();
-
-            var reference = new ObjectReference(description);
-            _map[reference] = instance.Value;
-
-            return reference;
         }
 
         public object InvokeMember(ObjectReference objectReference, string name, List<RuntimeArgument> arguments)
         {
-            var obj = _map[objectReference];
-            var type = obj.GetType();
-            var methodInfo = type.GetMethod(name);
-            var args = SerializationServices.Deserialize(arguments);
-            var retVal = methodInfo.Invoke(obj, args.ToArray());
+            try
+            {
+                var obj = _map[objectReference];
+                var type = obj.GetType();
+                var methodInfo = type.GetMethod(name);
+                var args = SerializationServices.Deserialize(arguments);
+                var retVal = methodInfo.Invoke(obj, args.ToArray());
 
-            return retVal;
+                return retVal;
+            }
+            catch (Exception exception)
+            {
+                var message = string.Format("Error while invoking member {0}.", name);
+                throw new FaultException<RemoteActivatorExceptionDetail>(
+                    new RemoteActivatorExceptionDetail(exception) { Description = objectReference.Description },
+                    new FaultReason(message));
+            }
         }
 
         public void DeactivateInstance(ObjectReference objectReference)
         {
-            var obj = _map[objectReference];
-            _map.Remove(objectReference);
-
-            IDisposable disposable = obj as IDisposable;
-            if (disposable != null)
+            try
             {
-                disposable.Dispose();
+                var obj = _map[objectReference];
+                _map.Remove(objectReference);
+
+                var disposable = obj as IDisposable;
+                if (disposable != null)
+                {
+                    disposable.Dispose();
+                }
+            }
+            catch (Exception exception)
+            {
+                var message = string.Format("Error while deactivating instance {0}.", objectReference);
+                throw new FaultException<RemoteActivatorExceptionDetail>(
+                    new RemoteActivatorExceptionDetail(exception) { Description = objectReference.Description },
+                    new FaultReason(message));
             }
         }
     }

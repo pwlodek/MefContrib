@@ -43,14 +43,24 @@ namespace MefContrib.Hosting.Isolation
             var interfaces = implementationType.GetInterfaces();
             var additionalInterfaces = interfaces.Where(t => t != contractType).ToArray();
 
-            var activatorHost = ActivationHost.CreateActivatorHost(isolationMetadata);
-            var activator = activatorHost.GetActivator();
+            var activatorHost = ActivationHost.CreateActivationHost(isolationMetadata);
 
-            var reference = activator.ActivateInstance(activatorHost.Description, assembly, typeName);
+            try
+            {
+                
+                var activator = activatorHost.GetActivator();
+                var reference = activator.ActivateInstance(activatorHost.Description, assembly, typeName);
 
-            RemotingServices.CloseActivator(activator);
+                RemotingServices.CloseActivator(activator);
 
-            return ProxyFactory.GetFactory().CreateProxy(reference, contractType, additionalInterfaces);
+                return ProxyFactory.GetFactory().CreateProxy(reference, contractType, additionalInterfaces);
+            }
+            catch (Exception exception)
+            {
+                ProxyServices.HandleHostException(exception, activatorHost.Description);
+            }
+
+            throw new InvalidOperationException("Should never happen.");
         }
 
         public static void ReleaseInstance(object instance)

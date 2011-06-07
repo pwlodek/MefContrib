@@ -10,7 +10,17 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         public CurrentAppDomainPartActivationHost(ActivationHostDescription description) 
             : base(description)
         {
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             _serviceHost = RemotingServices.CreateServiceHost(Address);
+        }
+
+        void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (!Faulted)
+            {
+                Faulted = true;
+                PartHost.OnFailure(this);    
+            }
         }
         
         public override void Start()
