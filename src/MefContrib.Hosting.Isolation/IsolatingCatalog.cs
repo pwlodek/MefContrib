@@ -44,14 +44,23 @@ namespace MefContrib.Hosting.Isolation
         {
             foreach (var exportDefinition in original.ExportDefinitions)
             {
-                var metadata = ContractServices.TryGetMetadataView<IIsolationMetadata>(exportDefinition.Metadata);
-                if (metadata != null)
+                if (SupportsIsolation(exportDefinition.Metadata))
                 {
-                    return new IsolatingComposablePartDefinition(original);
+                    return new IsolatingComposablePartDefinition(original);   
                 }
             }
 
             return original;
+        }
+
+        private static bool SupportsIsolation(IDictionary<string,object> metadata)
+        {
+            if (metadata.ContainsKey("Isolation"))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
