@@ -15,6 +15,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
         private static AggregateCatalog _aggregateCatalog = new AggregateCatalog();
         private static CompositionContainer _container = new CompositionContainer(_aggregateCatalog);
         private static Dictionary<Type, TypeCatalog> _initialized = new Dictionary<Type, TypeCatalog>();
+        private static HashSet<Assembly> _assemblyInitialized = new HashSet<Assembly>();
 
         public void HeartBeat()
         {
@@ -23,8 +24,24 @@ namespace MefContrib.Hosting.Isolation.Runtime
         public ObjectReference ActivateInstance(ActivationHostDescription description, string assemblyName, string typeName)
         {
             var assembly = Assembly.Load(assemblyName);
-            var type = assembly.GetTypes().Where(t => t.FullName == typeName).FirstOrDefault();
+            if (_assemblyInitialized.Contains(assembly) == false)
+            {
+                var hooks = assembly.GetTypes().Where(t => typeof (ActivationHook).IsAssignableFrom(t));
+                foreach (var hook in hooks)
+                {
+                    try
+                    {
+                        var hookInstance = (ActivationHook)Activator.CreateInstance(hook);
+                        hookInstance.Initialize(_container, _aggregateCatalog);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                _assemblyInitialized.Add(assembly);
+            }
 
+            var type = assembly.GetTypes().Where(t => t.FullName == typeName).FirstOrDefault();
             if (_initialized.ContainsKey(type) == false)
             {
                 var catalog = new TypeCatalog(type);
@@ -32,7 +49,6 @@ namespace MefContrib.Hosting.Isolation.Runtime
                 _aggregateCatalog.Catalogs.Add(catalog);
             }
 
-            //var obj = Activator.CreateInstance(type);
             var contract = (string)_initialized[type].Parts.First().ExportDefinitions.First().Metadata["ExportTypeIdentity"];
             var instance = _container.GetExports(typeof (object), null, contract).FirstOrDefault();
 
