@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MefContrib.Hosting.Isolation.Runtime.Activation
+namespace MefContrib.Hosting.Isolation.Runtime
 {
 
     [Serializable]

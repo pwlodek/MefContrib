@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace MefContrib.Hosting.Isolation.Runtime
 {
     [DataContract]
-    public class RuntimeArgument
+    public class InvokeArgument
     {
         [DataMember]
         public string Name { get; set; }

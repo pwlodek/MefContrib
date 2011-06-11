@@ -36,7 +36,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
                             hostBase.Faulted = true;
                             try
                             {
-                                PartHost.OnFailure(hostBase, exception);
+                                PartHost.OnFaulted(hostBase, exception);
                             }
                             catch (Exception)
                             {

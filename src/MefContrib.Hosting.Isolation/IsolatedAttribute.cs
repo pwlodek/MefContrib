@@ -5,7 +5,7 @@ namespace MefContrib.Hosting.Isolation
 {
     [MetadataAttribute]
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class IsolationAttribute : Attribute, IIsolationMetadata
+    public class IsolatedAttribute : Attribute, IIsolationMetadata
     {
         public IsolationLevel Isolation { get; set; }
 

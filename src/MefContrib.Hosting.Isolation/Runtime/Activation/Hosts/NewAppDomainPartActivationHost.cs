@@ -24,7 +24,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
                 if (!Faulted)
                 {
                     Faulted = true;
-                    PartHost.OnFailure(this, e.ExceptionObject as Exception);
+                    PartHost.OnFaulted(this, e.ExceptionObject as Exception);
                 }
             }
         }

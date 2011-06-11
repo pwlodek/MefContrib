@@ -5,21 +5,21 @@ namespace MefContrib.Hosting.Isolation
 {
     [MetadataAttribute]
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class IsolationExportAttribute : ExportAttribute, IIsolationMetadata
+    public class IsolatedExportAttribute : ExportAttribute, IIsolationMetadata
     {
-        public IsolationExportAttribute()
+        public IsolatedExportAttribute()
         {
         }
 
-        public IsolationExportAttribute(Type contractType) : base(contractType)
+        public IsolatedExportAttribute(Type contractType) : base(contractType)
         {
         }
 
-        public IsolationExportAttribute(string contractName) : base(contractName)
+        public IsolatedExportAttribute(string contractName) : base(contractName)
         {
         }
 
-        public IsolationExportAttribute(string contractName, Type contractType) : base(contractName, contractType)
+        public IsolatedExportAttribute(string contractName, Type contractType) : base(contractName, contractType)
         {
         }
 

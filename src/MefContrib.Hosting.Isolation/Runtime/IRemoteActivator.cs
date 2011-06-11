@@ -20,7 +20,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
 
         [OperationContract]
         [FaultContract(typeof(RemoteActivatorExceptionDetail))]
-        ReturnValue InvokeMember(ObjectReference objectReference, string name, List<RuntimeArgument> arguments);
+        InvokeReturnValue InvokeMember(ObjectReference objectReference, string name, List<InvokeArgument> arguments);
 
         [OperationContract]
         [FaultContract(typeof(RemoteActivatorExceptionDetail))]

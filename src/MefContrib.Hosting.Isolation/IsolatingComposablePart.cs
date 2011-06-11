@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Primitives;
-using System.ComponentModel.Composition.ReflectionModel;
-
 namespace MefContrib.Hosting.Isolation
 {
+    using System.ComponentModel.Composition.ReflectionModel;
+    using MefContrib.Hosting.Isolation.Runtime;
+
     public class IsolatingComposablePart : ComposablePart
     {
         private readonly IDictionary<ExportDefinition, object> _values;

@@ -9,9 +9,9 @@ namespace MefContrib.Hosting.Isolation.Runtime
     {
         private static readonly BinaryFormatter Formatter = new BinaryFormatter();
 
-        public static ReturnValue Serialize(object value)
+        public static InvokeReturnValue Serialize(object value)
         {
-            var returnValue = new ReturnValue();
+            var returnValue = new InvokeReturnValue();
 
             using (var memoryStream = new MemoryStream())
             {
@@ -22,7 +22,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
             return returnValue;
         }
 
-        public static object Deserialize(ReturnValue value)
+        public static object Deserialize(InvokeReturnValue value)
         {
             if (value.Value != null && value.Value.Length > 0)
             {
@@ -36,14 +36,14 @@ namespace MefContrib.Hosting.Isolation.Runtime
             return null;
         }
 
-        public static List<RuntimeArgument> Serialize(object[] values)
+        public static List<InvokeArgument> Serialize(object[] values)
         {
-            var list = new List<RuntimeArgument>();
+            var list = new List<InvokeArgument>();
             for (int index = 0; index < values.Length; index++)
             {
                 var value = values[index];
                 
-                var argument = new RuntimeArgument();
+                var argument = new InvokeArgument();
 
                 if (value != null)
                 {
@@ -60,7 +60,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
             return list;
         }
 
-        public static List<object> Deserialize(List<RuntimeArgument> arguments)
+        public static List<object> Deserialize(List<InvokeArgument> arguments)
         {
             var list = new List<object>();
             for (int index = 0; index < arguments.Count; index++)

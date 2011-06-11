@@ -1,9 +1,9 @@
 using System.Runtime.Serialization;
 
-namespace MefContrib.Hosting.Isolation.Runtime.Activation
+namespace MefContrib.Hosting.Isolation.Runtime
 {
     [DataContract]
-    public class ReturnValue
+    public class InvokeReturnValue
     {
         [DataMember]
         public byte[] Value { get; set; }

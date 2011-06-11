@@ -70,7 +70,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
             }
         }
 
-        public ReturnValue InvokeMember(ObjectReference objectReference, string name, List<RuntimeArgument> arguments)
+        public InvokeReturnValue InvokeMember(ObjectReference objectReference, string name, List<InvokeArgument> arguments)
         {
             try
             {

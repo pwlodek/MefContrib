@@ -1,6 +1,6 @@
-
 namespace MefContrib.Hosting.Isolation.Runtime.Proxies
 {
+    using System;
     using LinFu.DynamicProxy;
 
     public class LinFuProxy : IInterceptor
@@ -9,12 +9,17 @@ namespace MefContrib.Hosting.Isolation.Runtime.Proxies
 
         public LinFuProxy(ObjectReference objectReference)
         {
+            if (objectReference == null)
+            {
+                throw new ArgumentNullException("objectReference");
+            }
+
             _objectReference = objectReference;
         }
 
         public object Intercept(InvocationInfo info)
         {
-            return ProxyServices.InvokeMember(
+            return PartHost.InvokeMember(
                 _objectReference, info.TargetMethod, info.Arguments);
         }
     }

@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.Composition;
 
 namespace MefContrib.Hosting.Isolation.Tests
@@ -9,10 +10,22 @@ namespace MefContrib.Hosting.Isolation.Tests
         public IFakePart Part { get; set; }
     }
 
-    [IsolationExport(typeof(IFakePart), Isolation = IsolationLevel.None)]
+    [IsolatedExport(typeof(IFakePart), Isolation = IsolationLevel.None)]
     public class FakePart1 : IFakePart
     {
         
+    }
+
+    [Export(typeof(IFakePart))]
+    [Isolated(Isolation = IsolationLevel.None)]
+    public class DisposableFakePart1 : IFakePart, IDisposable
+    {
+        public bool IsDisposed { get; private set; }
+
+        public void Dispose()
+        {
+            IsDisposed = true;
+        }
     }
 
     public interface IFakePart { }

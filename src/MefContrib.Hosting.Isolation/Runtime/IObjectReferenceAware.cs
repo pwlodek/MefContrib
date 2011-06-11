@@ -1,4 +1,4 @@
-namespace MefContrib.Hosting.Isolation.Runtime.Proxies
+namespace MefContrib.Hosting.Isolation.Runtime
 {
     public interface IObjectReferenceAware
     {
