@@ -10,6 +10,10 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 
         void Stop();
 
+        bool Started { get; }
+
+        bool Faulted { get; }
+
         IRemoteActivator GetActivator();
     }
 }

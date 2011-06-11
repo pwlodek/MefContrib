@@ -10,9 +10,42 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
     {
         private static readonly List<IPartActivationHost> Hosts = new List<IPartActivationHost>();
 
+        public const string DefaultGroup = "DefaultGroup";
+
         static ActivationHost()
         {
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+
+            Timer timer = new Timer(s =>
+            {
+                foreach (var partActivationHost in Hosts)
+                {
+                    if (!partActivationHost.Started) continue;
+
+                    try
+                    {
+                        var activator = partActivationHost.GetActivator();
+                        activator.HeartBeat();
+                        RemotingServices.CloseActivator(activator);
+                    }
+                    catch (Exception exception)
+                    {
+                        if (!partActivationHost.Faulted)
+                        {
+                            var hostBase = (PartActivationHostBase) partActivationHost;
+                            hostBase.Faulted = true;
+                            try
+                            {
+                                PartHost.OnFailure(hostBase, exception);
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        }
+                    }
+                }
+            });
+            timer.Change(0, 1000);
         }
 
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
@@ -46,20 +79,20 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
 
         public static IPartActivationHost CreateActivationHost(IIsolationMetadata isolationMetadata)
         {
-            var groupName = isolationMetadata.IsolationGroup;
+            var groupName = isolationMetadata.IsolationGroup ?? DefaultGroup;
             if (isolationMetadata.HostPerInstance)
             {
                 groupName = Guid.NewGuid().ToString();
             }
 
-            var activationHost = Hosts.FirstOrDefault(t => t.Description.Group == groupName);
-            if (activationHost != null)
+            var activationHost = Hosts.FirstOrDefault(t => t.Description.Isolation == isolationMetadata.Isolation && t.Description.Group == groupName);
+            if (activationHost != null && !activationHost.Faulted)
             {
                 return activationHost;
             }
 
-            var description = new ActivationHostDescription(groupName);
-            IPartActivationHost host;
+            var description = new ActivationHostDescription(isolationMetadata.Isolation, groupName);
+            PartActivationHostBase host;
 
             switch (isolationMetadata.Isolation)
             {
@@ -88,21 +121,25 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
             // Wait till hosts starts up, if this is taking too much time, throw an exception
             ThrowIfCannotConnect(host);
 
+            // have the connectivity - started
+            host.Started = true;
+
             return host;
         }
 
         private static void ThrowIfCannotConnect(IPartActivationHost host)
         {
             // test connection with the remote activator
-            var activator = host.GetActivator();
+            IRemoteActivator activator = null;
             var retryCount = 4;
             var success = false;
             var currentWaitTimeMilis = 100;
 
-            while (!success && retryCount > 0)
+            while (!success && !host.Faulted && retryCount > 0)
             {
                 try
                 {
+                    activator = host.GetActivator();
                     activator.HeartBeat();
                     success = true;
                 }
@@ -112,7 +149,6 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
                     currentWaitTimeMilis *= 2; // exponential backoff
                     success = false;
                     retryCount--;
-                    activator = host.GetActivator();
                 }
             }
             

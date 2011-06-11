@@ -8,7 +8,7 @@ using MefContrib.Hosting.Isolation.Runtime.Activation;
 
 namespace MefContrib.Hosting.Isolation.Runtime
 {
-    [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerCall)]
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerCall, UseSynchronizationContext = false, ConcurrencyMode = ConcurrencyMode.Reentrant)]
     public class RemoteActivator : IRemoteActivator
     {
         private static Dictionary<ObjectReference, object> _map = new Dictionary<ObjectReference, object>();
@@ -51,11 +51,13 @@ namespace MefContrib.Hosting.Isolation.Runtime
                     _aggregateCatalog.Catalogs.Add(catalog);
                 }
 
-                var contract = (string)_initialized[type].Parts.First().ExportDefinitions.First().Metadata["ExportTypeIdentity"];
-                var instance = _container.GetExports(typeof(object), null, contract).FirstOrDefault();
+                //var contract = (string)_initialized[type].Parts.First().ExportDefinitions.First().Metadata["ExportTypeIdentity"];
+                //var instance = _container.GetExports(typeof(object), null, contract).FirstOrDefault();
+                var instance = Activator.CreateInstance(type);
 
                 var reference = new ObjectReference(description);
-                _map[reference] = instance.Value;
+                _map[reference] = instance;
+                //_map[reference] = instance.Value;
 
                 return reference;
             }
@@ -68,7 +70,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
             }
         }
 
-        public object InvokeMember(ObjectReference objectReference, string name, List<RuntimeArgument> arguments)
+        public ReturnValue InvokeMember(ObjectReference objectReference, string name, List<RuntimeArgument> arguments)
         {
             try
             {
@@ -78,7 +80,8 @@ namespace MefContrib.Hosting.Isolation.Runtime
                 var args = SerializationServices.Deserialize(arguments);
                 var retVal = methodInfo.Invoke(obj, args.ToArray());
 
-                return retVal;
+                var returnValue = SerializationServices.Serialize(retVal);
+                return returnValue;
             }
             catch (Exception exception)
             {

@@ -1,11 +1,12 @@
 using System;
+using System.Threading;
 
 namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
     public class NewAppDomainPartActivationHost : PartActivationHostBase
     {
         private readonly AppDomain _domain;
-
+        
         public NewAppDomainPartActivationHost(ActivationHostDescription description)
             : base(description)
         {
@@ -23,7 +24,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
                 if (!Faulted)
                 {
                     Faulted = true;
-                    PartHost.OnFailure(this);
+                    PartHost.OnFailure(this, e.ExceptionObject as Exception);
                 }
             }
         }
@@ -32,7 +33,6 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         {
             var t = new Trampoline(Address);
             _domain.DoCallBack(t.StartCore);
-            
         }
 
         public override void Stop()
@@ -44,7 +44,8 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         private class Trampoline
         {
             private string _address;
-            
+            private ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
+
             public Trampoline(string address)
             {
                 _address = address;
@@ -54,9 +55,15 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
             public void StartCore()
             {
                 var serviceHost = RemotingServices.CreateServiceHost(_address);
+                serviceHost.Opened += serviceHost_Opened;
                 serviceHost.Open();
-
+                _manualResetEvent.WaitOne();
                 AppDomain.CurrentDomain.DomainUnload += (s, e) => serviceHost.Close();
+            }
+
+            void serviceHost_Opened(object sender, EventArgs e)
+            {
+                _manualResetEvent.Set();
             }
         }
     }

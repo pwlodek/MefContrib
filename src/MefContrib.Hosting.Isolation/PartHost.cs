@@ -11,11 +11,11 @@ namespace MefContrib.Hosting.Isolation
     {
         public static event EventHandler<ActivationHostEventArgs> Failure;
 
-        internal static void OnFailure(IPartActivationHost host)
+        internal static void OnFailure(IPartActivationHost host, Exception exception)
         {
             if (Failure != null)
             {
-                Failure(host, new ActivationHostEventArgs(host.Description));
+                Failure(host, new ActivationHostEventArgs(host.Description, exception));
             }
         }
 
@@ -43,11 +43,19 @@ namespace MefContrib.Hosting.Isolation
             var interfaces = implementationType.GetInterfaces();
             var additionalInterfaces = interfaces.Where(t => t != contractType).ToArray();
 
-            var activatorHost = ActivationHost.CreateActivationHost(isolationMetadata);
+            IPartActivationHost activatorHost;
 
             try
             {
-                
+                activatorHost = ActivationHost.CreateActivationHost(isolationMetadata);
+            }
+            catch (Exception)
+            {
+                throw new Exception("Cannot activate host.");
+            }
+
+            try
+            {
                 var activator = activatorHost.GetActivator();
                 var reference = activator.ActivateInstance(activatorHost.Description, assembly, typeName);
 

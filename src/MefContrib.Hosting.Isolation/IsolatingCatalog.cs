@@ -19,7 +19,12 @@ namespace MefContrib.Hosting.Isolation
         {
             get { return GetParts(); }
         }
-        
+
+        public override IEnumerable<System.Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
+        {
+            return base.GetExports(definition);
+        }
+
         private IQueryable<ComposablePartDefinition> GetParts()
         {
             if (_innerPartsQueryable == null)

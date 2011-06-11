@@ -1,5 +1,6 @@
 using System;
 using System.ServiceModel;
+using System.Threading;
 
 namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
@@ -19,7 +20,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
             if (!Faulted)
             {
                 Faulted = true;
-                PartHost.OnFailure(this);    
+                PartHost.OnFailure(this, e.ExceptionObject as Exception);    
             }
         }
         

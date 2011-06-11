@@ -25,7 +25,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Proxies
             }
 
             IRemoteActivator remoteActivator = ActivationHost.GetActivator(objectReference);
-            object returnValue = null;
+            ReturnValue returnValue = null;
             Exception exception = null;
             try
             {
@@ -43,7 +43,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Proxies
 
             HandleHostException(exception, objectReference.Description, objectReference);
 
-            return returnValue;
+            return SerializationServices.Deserialize(returnValue);
         }
 
         public static void HandleHostException(Exception exception, ActivationHostDescription description, ObjectReference reference = null)
@@ -74,12 +74,12 @@ namespace MefContrib.Hosting.Isolation.Runtime.Proxies
                         if (activationHostBase.Faulted == false)
                         {
                             activationHostBase.Faulted = true;
-                            PartHost.OnFailure(host);
+                            PartHost.OnFailure(host, exception);
                         }
                     }
                     else
                     {
-                        PartHost.OnFailure(host);
+                        PartHost.OnFailure(host, exception);
                     }
                 }
 

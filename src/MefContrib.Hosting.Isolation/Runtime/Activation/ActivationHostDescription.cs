@@ -5,20 +5,24 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
     [Serializable]
     public class ActivationHostDescription : IEquatable<ActivationHostDescription>
     {
-        public ActivationHostDescription(string groupName)
+        public ActivationHostDescription(IsolationLevel isolationLevel, string groupName)
         {
             Id = Guid.NewGuid();
             Group = groupName;
+            Isolation = isolationLevel;
         }
 
-        public ActivationHostDescription()
+        public ActivationHostDescription(IsolationLevel isolationLevel)
         {
             Id = Guid.NewGuid();
+            Isolation = isolationLevel;
         }
 
         public Guid Id { get; private set; }
 
         public string Group { get; private set; }
+
+        public IsolationLevel Isolation { get; private set; }
 
         #region Equality Implementation
 

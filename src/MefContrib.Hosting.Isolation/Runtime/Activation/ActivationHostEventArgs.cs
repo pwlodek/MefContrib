@@ -6,7 +6,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
     {
         public ActivationHostDescription Description { get; private set; }
 
-        public ActivationHostEventArgs(ActivationHostDescription description)
+        public ActivationHostEventArgs(ActivationHostDescription description, Exception cause)
         {
             if (description == null)
             {
@@ -14,6 +14,9 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
             }
 
             Description = description;
+            Cause = cause;
         }
+
+        public Exception Cause { get; private set; }
     }
 }

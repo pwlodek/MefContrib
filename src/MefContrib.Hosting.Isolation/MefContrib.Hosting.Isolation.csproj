@@ -64,6 +64,7 @@
     <Compile Include="Runtime\Activation\Hosts\IPartActivationHost.cs" />
     <Compile Include="Runtime\Activation\Hosts\NewAppDomainPartActivationHost.cs" />
     <Compile Include="Runtime\Activation\Hosts\NewProcessPartActivationHost.cs" />
+    <Compile Include="Runtime\Activation\ReturnValue.cs" />
     <Compile Include="Runtime\IRemoteActivator.cs" />
     <Compile Include="Runtime\ObjectReference.cs" />
     <Compile Include="Runtime\Proxies\IObjectReferenceAware.cs" />

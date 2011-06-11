@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using MefContrib.Hosting.Isolation.Runtime;
 
 namespace MefContrib.Hosting.Isolation.PluginContainer
@@ -18,7 +21,23 @@ namespace MefContrib.Hosting.Isolation.PluginContainer
             parentProcess.Exited += OnParentProcessExited;
             var serviceHost = RemotingServices.CreateServiceHost(address);
             serviceHost.Open();
+            
+            Task task = new Task(() =>
+            {
+                while (true)
+                {
+                    var processes = Process.GetProcesses();
+                    var parent = processes.FirstOrDefault(t => t.Id == parentId);
+                    if (parent == null)
+                    {
+                        Environment.Exit(0);
+                    }
 
+                    Thread.Sleep(2000);
+                }
+            });
+
+            task.Start();
             Console.ReadKey();
         }
 
