@@ -43,6 +43,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
                 var instance = Activator.CreateInstance(type);
 
                 var reference = new ObjectReference(description);
+                reference.IsDisposable = (instance as IDisposable) != null;
                 ObjectMap[reference] = instance;
 
                 return reference;

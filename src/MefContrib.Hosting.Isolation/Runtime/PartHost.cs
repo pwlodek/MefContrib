@@ -1,9 +1,8 @@
-using System.Reflection;
-
 namespace MefContrib.Hosting.Isolation.Runtime
 {
     using System;
     using System.Linq;
+    using System.Reflection;
     using MefContrib.Hosting.Isolation.Runtime.Activation;
     using MefContrib.Hosting.Isolation.Runtime.Activation.Hosts;
     using MefContrib.Hosting.Isolation.Runtime.Proxies;
@@ -80,6 +79,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
                 var reference = aware.Reference;
                 var activator = ActivationHost.GetActivator(reference);
                 activator.DeactivateInstance(reference);
+                reference.IsDisposed = true;
 
                 RemotingServices.CloseActivator(activator);
             }
@@ -94,7 +94,14 @@ namespace MefContrib.Hosting.Isolation.Runtime
 
             if (objectReference.Faulted)
             {
-                throw new InvokeException("Given object is faulted.");
+                throw new InvokeException(
+                    string.Format("Object [{0}] is faulted.", objectReference));
+            }
+
+            if (objectReference.IsDisposed)
+            {
+                throw new ObjectDisposedException(
+                    string.Format("Object [{0}] has been disposed.", objectReference));
             }
 
             if (methodInfo.DeclaringType == typeof(IObjectReferenceAware))

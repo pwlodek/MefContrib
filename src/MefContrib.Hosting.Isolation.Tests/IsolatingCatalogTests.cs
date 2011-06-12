@@ -1,5 +1,6 @@
 using System.ComponentModel.Composition.Hosting;
 using System.Linq;
+using MefContrib.Hosting.Isolation.Runtime;
 using NUnit.Framework;
 
 namespace MefContrib.Hosting.Isolation.Tests
@@ -36,6 +37,21 @@ namespace MefContrib.Hosting.Isolation.Tests
         }
 
         [Test]
+        public void Remote_proxy_supports_IObjectReferenceAware_interface()
+        {
+            var typeCatalog = new TypeCatalog(typeof(TempPart), typeof(FakePart1));
+            var isolatingCatalog = new IsolatingCatalog(typeCatalog);
+            var container = new CompositionContainer(isolatingCatalog);
+
+            var part = container.GetExportedValue<TempPart>();
+            Assert.That(part, Is.Not.Null);
+            Assert.That(part.Part, Is.Not.Null);
+
+            var aware = part.Part as IObjectReferenceAware;
+            Assert.That(aware, Is.Not.Null);
+        }
+
+        [Test]
         public void Dispose_is_called_on_a_disposable_part_activated_remotely()
         {
             var typeCatalog = new TypeCatalog(typeof(TempPart), typeof(DisposableFakePart1));
@@ -45,12 +61,17 @@ namespace MefContrib.Hosting.Isolation.Tests
             var part = container.GetExportedValue<TempPart>();
             Assert.That(part, Is.Not.Null);
             Assert.That(part.Part, Is.Not.Null);
-
+            
+            var aware = (IObjectReferenceAware) part.Part;
+            Assert.That(aware.Reference.IsDisposable, Is.True);
+            Assert.That(aware.Reference.IsDisposed, Is.False);
             Assert.That(DisposableFakePart1.IsDisposed, Is.False);
 
             // dispose the container should dispose remotely activated part
             container.Dispose();
 
+            Assert.That(aware.Reference.IsDisposable, Is.True);
+            Assert.That(aware.Reference.IsDisposed, Is.True);
             Assert.That(DisposableFakePart1.IsDisposed, Is.True);
         }
     }

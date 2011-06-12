@@ -20,11 +20,36 @@ namespace MefContrib.Hosting.Isolation.Runtime
         }
 
         /// <summary>
-        /// Indicates if the object is faulted. This can happen if an activation host crash.
+        /// Indicates if the object is faulted. This happens if an activation host responsible
+        /// for maintaining the original object crashes.
         /// </summary>
         public bool Faulted { get; internal set; }
 
+        /// <summary>
+        /// Indicates if the object is disposable.
+        /// </summary>
+        public bool IsDisposable { get; internal set; }
+
+        /// <summary>
+        /// indicates if the remote object is disposed.
+        /// </summary>
+        public bool IsDisposed { get; internal set; }
+
+        /// <summary>
+        /// Gets information about activation host used to activate this object.
+        /// </summary>
         public ActivationHostDescription Description { get; private set; }
+
+        #region Overrides
+
+        public override string ToString()
+        {
+            return _guid.ToString();
+        }
+
+        #endregion
+
+        #region Equality implementation
 
         public bool Equals(ObjectReference other)
         {
@@ -45,12 +70,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
         {
             return _guid.GetHashCode();
         }
-
-        public override string ToString()
-        {
-            return _guid.ToString();
-        }
-
+        
         public static bool operator ==(ObjectReference left, ObjectReference right)
         {
             return Equals(left, right);
@@ -60,5 +80,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
         {
             return !Equals(left, right);
         }
+
+        #endregion
     }
 }
