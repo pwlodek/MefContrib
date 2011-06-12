@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
@@ -15,5 +16,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         bool Faulted { get; }
 
         IRemoteActivator GetActivator();
+
+        ISet<Type> ActivatedTypes { get; }
     }
 }

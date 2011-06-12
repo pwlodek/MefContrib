@@ -77,16 +77,20 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
             return Hosts.Single(t => t.Description == description);
         }
 
-        public static IPartActivationHost CreateActivationHost(IIsolationMetadata isolationMetadata)
+        public static IPartActivationHost CreateActivationHost(Type implementationType, IIsolationMetadata isolationMetadata)
         {
             var groupName = isolationMetadata.IsolationGroup ?? DefaultGroup;
-            if (isolationMetadata.HostPerInstance)
-            {
-                groupName = Guid.NewGuid().ToString();
-            }
-
-            var activationHost = Hosts.FirstOrDefault(t => t.Description.Isolation == isolationMetadata.Isolation && t.Description.Group == groupName);
-            if (activationHost != null && !activationHost.Faulted)
+            var activationHost = isolationMetadata.HostPerInstance
+                                 ? Hosts.FirstOrDefault(
+                                     t =>
+                                     !t.Faulted && t.Description.Isolation == isolationMetadata.Isolation &&
+                                     t.Description.Group == groupName && !t.ActivatedTypes.Contains(implementationType))
+                                 : Hosts.FirstOrDefault(
+                                     t =>
+                                     !t.Faulted && t.Description.Isolation == isolationMetadata.Isolation &&
+                                     t.Description.Group == groupName);
+            
+            if (activationHost != null)
             {
                 return activationHost;
             }

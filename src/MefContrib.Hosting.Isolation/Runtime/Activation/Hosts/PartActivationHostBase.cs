@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
@@ -12,7 +13,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
             }
 
             Description = description;
-
+            ActivatedTypes = new HashSet<Type>();
             Address = string.Concat(RemotingServices.BaseAddress, description.Id);
         }
 
@@ -27,6 +28,8 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         public bool Started { get; internal set; }
 
         public bool Faulted { get; internal set; }
+
+        public ISet<Type> ActivatedTypes { get; private set; }
 
         public IRemoteActivator GetActivator()
         {

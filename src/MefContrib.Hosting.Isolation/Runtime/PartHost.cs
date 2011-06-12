@@ -47,7 +47,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
 
             try
             {
-                activatorHost = ActivationHost.CreateActivationHost(isolationMetadata);
+                activatorHost = ActivationHost.CreateActivationHost(implementationType, isolationMetadata);
             }
             catch (Exception)
             {
@@ -56,6 +56,8 @@ namespace MefContrib.Hosting.Isolation.Runtime
 
             try
             {
+                var partActivationHostBase = (PartActivationHostBase) activatorHost;
+                partActivationHostBase.ActivatedTypes.Add(implementationType);
                 var activator = activatorHost.GetActivator();
                 var reference = activator.ActivateInstance(activatorHost.Description, assembly, typeName);
 
