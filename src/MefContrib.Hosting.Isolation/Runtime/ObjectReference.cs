@@ -6,7 +6,6 @@ namespace MefContrib.Hosting.Isolation.Runtime
     [Serializable]
     public class ObjectReference : IEquatable<ObjectReference>
     {
-        
         private Guid _guid;
 
         public ObjectReference(ActivationHostDescription description)

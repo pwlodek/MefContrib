@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Primitives;
 namespace MefContrib.Hosting.Isolation
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.Composition;
+    using System.ComponentModel.Composition.Primitives;
     using System.ComponentModel.Composition.ReflectionModel;
     using MefContrib.Hosting.Isolation.Runtime;
 
@@ -52,6 +52,11 @@ namespace MefContrib.Hosting.Isolation
         public override IDictionary<string, object> Metadata
         {
             get { return _definition.Metadata; }
+        }
+
+        protected IEnumerable<object> ExportedValues
+        {
+            get { return _values.Values; }
         }
     }
 }

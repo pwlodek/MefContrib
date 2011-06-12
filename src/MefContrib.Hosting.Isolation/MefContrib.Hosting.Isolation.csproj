@@ -45,6 +45,7 @@
     <Compile Include="..\MefContrib\Properties\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="DisposableIsolatingComposablePart.cs" />
     <Compile Include="IIsolationMetadata.cs" />
     <Compile Include="IsolatingCatalog.cs" />
     <Compile Include="IsolatingComposablePart.cs" />

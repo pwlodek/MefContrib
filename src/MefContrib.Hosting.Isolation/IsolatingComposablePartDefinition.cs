@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
+using System.ComponentModel.Composition.ReflectionModel;
 
 namespace MefContrib.Hosting.Isolation
 {
@@ -10,12 +11,21 @@ namespace MefContrib.Hosting.Isolation
 
         public IsolatingComposablePartDefinition(ComposablePartDefinition sourcePart)
         {
+            if (sourcePart == null)
+            {
+                throw new ArgumentNullException("sourcePart");
+            }
+
             _sourcePart = sourcePart;
         }
 
         public override ComposablePart CreatePart()
         {
-            return new IsolatingComposablePart(_sourcePart);
+            var part = ReflectionModelServices.IsDisposalRequired(_sourcePart)
+                           ? new DisposableIsolatingComposablePart(_sourcePart)
+                           : new IsolatingComposablePart(_sourcePart);
+
+            return part;
         }
 
         public override IEnumerable<ExportDefinition> ExportDefinitions

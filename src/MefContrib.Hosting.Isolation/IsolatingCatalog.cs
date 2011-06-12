@@ -20,11 +20,6 @@ namespace MefContrib.Hosting.Isolation
             get { return GetParts(); }
         }
 
-        public override IEnumerable<System.Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
-        {
-            return base.GetExports(definition);
-        }
-
         private IQueryable<ComposablePartDefinition> GetParts()
         {
             if (_innerPartsQueryable == null)
@@ -36,7 +31,6 @@ namespace MefContrib.Hosting.Isolation
                         IEnumerable<ComposablePartDefinition> parts =
                             new List<ComposablePartDefinition>(_interceptedCatalog.Parts);
                         
-
                         _innerPartsQueryable = parts.Select(GetPart).AsQueryable();
                     }
                 }
@@ -45,11 +39,11 @@ namespace MefContrib.Hosting.Isolation
             return _innerPartsQueryable;
         }
 
-        private ComposablePartDefinition GetPart(ComposablePartDefinition original)
+        private static ComposablePartDefinition GetPart(ComposablePartDefinition original)
         {
             foreach (var exportDefinition in original.ExportDefinitions)
             {
-                if (SupportsIsolation(exportDefinition.Metadata))
+                if (RequiresIsolation(exportDefinition.Metadata))
                 {
                     return new IsolatingComposablePartDefinition(original);   
                 }
@@ -58,7 +52,7 @@ namespace MefContrib.Hosting.Isolation
             return original;
         }
 
-        private static bool SupportsIsolation(IDictionary<string,object> metadata)
+        private static bool RequiresIsolation(IDictionary<string,object> metadata)
         {
             if (metadata.ContainsKey("Isolation"))
             {

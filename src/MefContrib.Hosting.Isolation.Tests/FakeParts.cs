@@ -13,14 +13,12 @@ namespace MefContrib.Hosting.Isolation.Tests
     [IsolatedExport(typeof(IFakePart), Isolation = IsolationLevel.None)]
     public class FakePart1 : IFakePart
     {
-        
     }
 
-    [Export(typeof(IFakePart))]
-    [Isolated(Isolation = IsolationLevel.None)]
+    [Export(typeof(IFakePart)), Isolated(Isolation = IsolationLevel.None)]
     public class DisposableFakePart1 : IFakePart, IDisposable
     {
-        public bool IsDisposed { get; private set; }
+        public static bool IsDisposed { get; private set; }
 
         public void Dispose()
         {
@@ -28,5 +26,7 @@ namespace MefContrib.Hosting.Isolation.Tests
         }
     }
 
-    public interface IFakePart { }
+    public interface IFakePart
+    {
+    }
 }
