@@ -6,19 +6,10 @@ namespace MefContrib.Hosting.Isolation.Runtime
     using MefContrib.Hosting.Isolation.Runtime.Activation;
     using MefContrib.Hosting.Isolation.Runtime.Activation.Hosts;
     using MefContrib.Hosting.Isolation.Runtime.Proxies;
+    using MefContrib.Hosting.Isolation.Runtime.Remote;
 
     public static class PartHost
     {
-        public static event EventHandler<ActivationHostEventArgs> Faulted;
-
-        internal static void OnFaulted(IPartActivationHost host, Exception exception)
-        {
-            if (Faulted != null)
-            {
-                Faulted(host, new ActivationHostEventArgs(host.Description, exception));
-            }
-        }
-
         public static TContract CreateInstance<TContract, TImplementation>(IIsolationMetadata isolationMetadata)
             where TImplementation : TContract
         {
@@ -43,17 +34,8 @@ namespace MefContrib.Hosting.Isolation.Runtime
             var interfaces = implementationType.GetInterfaces();
             var additionalInterfaces = interfaces.Where(t => t != contractType).ToArray();
 
-            IPartActivationHost activatorHost;
-
-            try
-            {
-                activatorHost = ActivationHost.CreateActivationHost(implementationType, isolationMetadata);
-            }
-            catch (Exception)
-            {
-                throw new Exception("Cannot activate host.");
-            }
-
+            IPartActivationHost activatorHost = ActivationHost.CreateActivationHost(implementationType, isolationMetadata);
+            
             try
             {
                 var partActivationHostBase = (PartActivationHostBase) activatorHost;
@@ -67,10 +49,12 @@ namespace MefContrib.Hosting.Isolation.Runtime
             }
             catch (Exception exception)
             {
-                HandleHostException(exception, activatorHost.Description);
-            }
+                ActivationHost.MarkFaultedIfNeeded(activatorHost.Description, exception);
 
-            throw new InvalidOperationException("Should never happen.");
+                throw new ActivationException(
+                    string.Format("Unable to activate instance of {0}.", implementationType.FullName),
+                    exception);
+            }
         }
 
         public static void ReleaseInstance(object instance)
@@ -78,12 +62,27 @@ namespace MefContrib.Hosting.Isolation.Runtime
             var aware = instance as IObjectReferenceAware;
             if (aware != null)
             {
-                var reference = aware.Reference;
-                var activator = ActivationHost.GetActivator(reference);
-                activator.DeactivateInstance(reference);
-                reference.IsDisposed = true;
+                var objectReference = aware.Reference;
 
-                RemotingServices.CloseActivator(activator);
+                try
+                {
+                    var activationHost = ActivationHost.GetActivationHost(objectReference);
+                    var activator = activationHost.GetActivator();
+                    activator.DeactivateInstance(objectReference);
+                    objectReference.IsDisposed = true;
+
+                    RemotingServices.CloseActivator(activator);
+                }
+                catch (Exception exception)
+                {
+                    ActivationHost.MarkFaultedIfNeeded(
+                        objectReference.Description,
+                        exception,
+                        objectReference);
+
+                    throw new InvokeException(
+                        string.Format("Unable to release object {0}.", objectReference));
+                }
             }
         }
 
@@ -92,6 +91,11 @@ namespace MefContrib.Hosting.Isolation.Runtime
             if (objectReference == null)
             {
                 throw new ArgumentNullException("objectReference");
+            }
+
+            if (methodInfo.DeclaringType == typeof(IObjectReferenceAware))
+            {
+                return objectReference;
             }
 
             if (objectReference.Faulted)
@@ -106,14 +110,9 @@ namespace MefContrib.Hosting.Isolation.Runtime
                     string.Format("Object [{0}] has been disposed.", objectReference));
             }
 
-            if (methodInfo.DeclaringType == typeof(IObjectReferenceAware))
-            {
-                return objectReference;
-            }
-
-            IRemoteActivator remoteActivator = ActivationHost.GetActivator(objectReference);
-            InvokeReturnValue invokeReturnValue = null;
-            Exception exception = null;
+            IPartActivationHost activationHost = ActivationHost.GetActivationHost(objectReference);
+            IRemoteActivator remoteActivator = activationHost.GetActivator();
+            InvokeReturnValue invokeReturnValue;
             try
             {
                 invokeReturnValue = remoteActivator.InvokeMember(
@@ -123,55 +122,18 @@ namespace MefContrib.Hosting.Isolation.Runtime
 
                 RemotingServices.CloseActivator(remoteActivator);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                exception = ex;
-            }
+                ActivationHost.MarkFaultedIfNeeded(
+                    objectReference.Description,
+                    exception,
+                    objectReference);
 
-            HandleHostException(exception, objectReference.Description, objectReference);
+                throw new InvokeException(
+                    string.Format("Unable to invoke method {0} on object {1}.", methodInfo.Name, objectReference));
+            }
 
             return SerializationServices.Deserialize(invokeReturnValue);
-        }
-
-        internal static void HandleHostException(Exception exception, ActivationHostDescription description, ObjectReference reference = null)
-        {
-            if (exception != null)
-            {
-                // first check if we have the connectivity with the activator host
-                var remoteActivator = ActivationHost.GetActivationHost(description).GetActivator();
-
-                try
-                {
-                    remoteActivator.HeartBeat();
-                    RemotingServices.CloseActivator(remoteActivator);
-                }
-                catch (Exception)
-                {
-                    // mark object as faulted
-                    if (reference != null)
-                    {
-                        reference.Faulted = true;
-                    }
-
-                    var host = ActivationHost.GetActivationHost(description);
-                    var activationHostBase = host as PartActivationHostBase;
-                    if (activationHostBase != null)
-                    {
-                        // we have a serious problem - plugin host has crashed
-                        if (activationHostBase.Faulted == false)
-                        {
-                            activationHostBase.Faulted = true;
-                            PartHost.OnFaulted(host, exception);
-                        }
-                    }
-                    else
-                    {
-                        PartHost.OnFaulted(host, exception);
-                    }
-                }
-
-                throw new InvokeException("Error while executing remote method.", exception);
-            }
         }
     }
 }

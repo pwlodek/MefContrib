@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ServiceModel;
 using MefContrib.Hosting.Isolation.Runtime.Activation;
 
-namespace MefContrib.Hosting.Isolation.Runtime
+namespace MefContrib.Hosting.Isolation.Runtime.Remote
 {
     /// <summary>
     /// remote activator

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MefContrib.Hosting.Isolation.Runtime;
+using MefContrib.Hosting.Isolation.Runtime.Remote;
 
 namespace MefContrib.Hosting.Isolation.PluginContainer
 {

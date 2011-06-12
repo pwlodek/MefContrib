@@ -1,8 +1,9 @@
-using System;
-using System.Collections.Generic;
-
 namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
+    using System;
+    using System.Collections.Generic;
+    using MefContrib.Hosting.Isolation.Runtime.Remote;
+
     public abstract class PartActivationHostBase : IPartActivationHost
     {
         protected PartActivationHostBase(ActivationHostDescription description)
@@ -35,7 +36,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         {
             if (Faulted)
             {
-                throw new ActivationHostException("This host is faulted.");
+                throw new ActivationHostException("Host you try to connect to is faulted.", Description);
             }
 
             try
@@ -46,7 +47,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
             catch (Exception exception)
             {
                 Faulted = true;
-                throw new ActivationHostException("Cannot create activator.", exception);
+                throw new ActivationHostException("Cannot create activator.", exception, Description);
             }
         }
     }

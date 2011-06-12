@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MefContrib.Hosting.Isolation.Runtime
+namespace MefContrib.Hosting.Isolation.Runtime.Remote
 {
     [DataContract]
     public class InvokeArgument

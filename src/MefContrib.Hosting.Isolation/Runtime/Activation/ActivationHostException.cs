@@ -1,8 +1,8 @@
-using System;
-using System.Runtime.Serialization;
-
 namespace MefContrib.Hosting.Isolation.Runtime.Activation
 {
+    using System;
+    using System.Runtime.Serialization;
+
     [Serializable]
     public class ActivationHostException : Exception
     {
@@ -10,17 +10,19 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
         {
         }
 
-        public ActivationHostException(string message) : base(message)
+        public ActivationHostException(string message, ActivationHostDescription description) : base(message)
         {
+            Description = description;
         }
 
-        public ActivationHostException(string message, Exception inner) : base(message, inner)
+        public ActivationHostException(string message, Exception inner, ActivationHostDescription description) : base(message, inner)
         {
+            Description = description;
         }
 
-        protected ActivationHostException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
+        public ActivationHostDescription Description { get; private set; }
+
+        protected ActivationHostException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }

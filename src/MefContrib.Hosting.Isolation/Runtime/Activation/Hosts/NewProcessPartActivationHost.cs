@@ -1,5 +1,3 @@
-using System;
-
 namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
     using System.Diagnostics;
@@ -20,13 +18,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
             _process.StartInfo.CreateNoWindow = true;
             _process.StartInfo.UseShellExecute = false;
             _process.StartInfo.FileName = "PluginContainer.exe";
-            _process.Exited += new System.EventHandler(_process_Exited);
             _process.Start();
-        }
-
-        void _process_Exited(object sender, System.EventArgs e)
-        {
-            Console.WriteLine("Exited with code: " + _process.ExitCode);
         }
 
         public override void Stop()

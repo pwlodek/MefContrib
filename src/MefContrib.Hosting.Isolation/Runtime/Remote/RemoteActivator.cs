@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.ServiceModel;
-using MefContrib.Hosting.Isolation.Runtime.Activation;
-
-namespace MefContrib.Hosting.Isolation.Runtime
+namespace MefContrib.Hosting.Isolation.Runtime.Remote
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+    using System.ServiceModel;
+    using MefContrib.Hosting.Isolation.Runtime.Activation;
+
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerCall, UseSynchronizationContext = false, ConcurrencyMode = ConcurrencyMode.Reentrant)]
     public class RemoteActivator : IRemoteActivator
     {

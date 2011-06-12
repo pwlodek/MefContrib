@@ -1,11 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using MefContrib.Hosting.Isolation.Runtime.Activation.Hosts;
-
-namespace MefContrib.Hosting.Isolation.Runtime.Activation
+namespace MefContrib.Hosting.Isolation.Runtime
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using MefContrib.Hosting.Isolation.Runtime.Activation;
+    using MefContrib.Hosting.Isolation.Runtime.Activation.Hosts;
+    using MefContrib.Hosting.Isolation.Runtime.Remote;
+
     public static class ActivationHost
     {
         private static readonly List<IPartActivationHost> Hosts = new List<IPartActivationHost>();
@@ -16,36 +18,88 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
         {
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
-            Timer timer = new Timer(s =>
+            var timer = new Timer(s =>
             {
                 foreach (var partActivationHost in Hosts)
                 {
-                    if (!partActivationHost.Started) continue;
-
-                    try
+                    if (partActivationHost.Started && !partActivationHost.Faulted)
                     {
-                        var activator = partActivationHost.GetActivator();
-                        activator.HeartBeat();
-                        RemotingServices.CloseActivator(activator);
-                    }
-                    catch (Exception exception)
-                    {
-                        if (!partActivationHost.Faulted)
+                        try
                         {
-                            var hostBase = (PartActivationHostBase) partActivationHost;
-                            hostBase.Faulted = true;
-                            try
-                            {
-                                PartHost.OnFaulted(hostBase, exception);
-                            }
-                            catch (Exception)
-                            {
-                            }
+                            var activator = partActivationHost.GetActivator();
+                            activator.HeartBeat();
+                            RemotingServices.CloseActivator(activator);
+                        }
+                        catch (Exception exception)
+                        {
+                            MarkFaulted(partActivationHost, exception);
                         }
                     }
                 }
             });
             timer.Change(0, 1000);
+        }
+
+        public static event EventHandler<ActivationHostEventArgs> Faulted;
+
+        private static void OnFaulted(IPartActivationHost host, Exception exception)
+        {
+            if (Faulted != null)
+            {
+                Faulted(host, new ActivationHostEventArgs(host.Description, exception));
+            }
+        }
+
+        internal static void MarkFaulted(IPartActivationHost host, Exception exception)
+        {
+            // if host is already marked, do nothing
+            if (host.Faulted) return;
+
+            lock (host)
+            {
+                // if host is already marked, do nothing
+                if (host.Faulted) return;
+
+                var activationHostBase = host as PartActivationHostBase;
+                if (activationHostBase != null)
+                {
+                    activationHostBase.Faulted = true;
+                }
+
+                try
+                {
+                    OnFaulted(host, exception);
+                }
+                catch (Exception)
+                {
+                }
+            }
+        }
+
+        internal static void MarkFaultedIfNeeded(ActivationHostDescription description, Exception exception, ObjectReference reference = null)
+        {
+            if (exception != null)
+            {
+                var host = GetActivationHost(description);
+                try
+                {
+                    // first check if we have the connectivity with the activator host
+                    var remoteActivator = host.GetActivator();
+                    remoteActivator.HeartBeat();
+
+                    RemotingServices.CloseActivator(remoteActivator);
+                }
+                catch (Exception)
+                {
+                    // mark object as faulted
+                    if (reference != null)
+                    {
+                        reference.Faulted = true;
+                    }
+
+                    MarkFaulted(host, exception);
+                }
+            }
         }
 
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
@@ -62,18 +116,23 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
             }
         }
   
-        public static IRemoteActivator GetActivator(ObjectReference objectReference)
-        {
-            return Hosts.Single(t => t.Description == objectReference.Description).GetActivator();
-        }
-
         public static IPartActivationHost GetActivationHost(ObjectReference objectReference)
         {
+            if (objectReference == null)
+            {
+                throw new ArgumentNullException("objectReference");
+            }
+
             return Hosts.Single(t => t.Description == objectReference.Description);
         }
 
         public static IPartActivationHost GetActivationHost(ActivationHostDescription description)
         {
+            if (description == null)
+            {
+                throw new ArgumentNullException("description");
+            }
+
             return Hosts.Single(t => t.Description == description);
         }
 
@@ -158,7 +217,7 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
             
             if (!success)
             {
-                throw new ActivationHostException("Cannot start host.");
+                throw new ActivationHostException("Cannot start host.", host.Description);
             }
 
             RemotingServices.CloseActivator(activator);

@@ -1,7 +1,7 @@
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 
-namespace MefContrib.Hosting.Isolation.Runtime
+namespace MefContrib.Hosting.Isolation.Runtime.Remote
 {
     public static class RemotingServices
     {

@@ -1,9 +1,9 @@
-using System;
-using System.ServiceModel;
-using System.Threading;
-
 namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
+    using System;
+    using System.ServiceModel;
+    using MefContrib.Hosting.Isolation.Runtime.Remote;
+
     public class CurrentAppDomainPartActivationHost : PartActivationHostBase
     {
         private readonly ServiceHost _serviceHost;
@@ -11,17 +11,13 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         public CurrentAppDomainPartActivationHost(ActivationHostDescription description) 
             : base(description)
         {
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += OnCurrentDomainUnhandledException;
             _serviceHost = RemotingServices.CreateServiceHost(Address);
         }
 
-        void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private void OnCurrentDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            if (!Faulted)
-            {
-                Faulted = true;
-                PartHost.OnFaulted(this, e.ExceptionObject as Exception);    
-            }
+            ActivationHost.MarkFaulted(this, e.ExceptionObject as Exception);
         }
         
         public override void Start()

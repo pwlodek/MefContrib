@@ -1,9 +1,8 @@
-namespace MefContrib.Hosting.Isolation.Runtime
+namespace MefContrib.Hosting.Isolation.Runtime.Remote
 {
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.Serialization.Formatters.Binary;
-    using MefContrib.Hosting.Isolation.Runtime.Activation;
 
     public static class SerializationServices
     {

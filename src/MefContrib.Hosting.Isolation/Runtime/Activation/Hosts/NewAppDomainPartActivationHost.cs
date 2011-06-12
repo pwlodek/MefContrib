@@ -1,8 +1,8 @@
-using System;
-using System.Threading;
-
 namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
+    using System;
+    using MefContrib.Hosting.Isolation.Runtime.Remote;
+
     public class NewAppDomainPartActivationHost : PartActivationHostBase
     {
         private readonly AppDomain _domain;
@@ -12,20 +12,15 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         {
             _domain = AppDomain.CreateDomain("Plugin_" + description.Id);
 
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            AppDomain.CurrentDomain.UnhandledException += OnCurrentDomainUnhandledException;
         }
 
-        void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private void OnCurrentDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             var senderDomain = (AppDomain) sender;
             if (senderDomain.Id == _domain.Id)
             {
-                // if already faulted, do nothing
-                if (!Faulted)
-                {
-                    Faulted = true;
-                    PartHost.OnFaulted(this, e.ExceptionObject as Exception);
-                }
+                ActivationHost.MarkFaulted(this, e.ExceptionObject as Exception);
             }
         }
         
@@ -44,7 +39,6 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         private class Trampoline
         {
             private string _address;
-            private ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
 
             public Trampoline(string address)
             {
@@ -55,15 +49,9 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
             public void StartCore()
             {
                 var serviceHost = RemotingServices.CreateServiceHost(_address);
-                serviceHost.Opened += serviceHost_Opened;
                 serviceHost.Open();
-                _manualResetEvent.WaitOne();
-                AppDomain.CurrentDomain.DomainUnload += (s, e) => serviceHost.Close();
-            }
 
-            void serviceHost_Opened(object sender, EventArgs e)
-            {
-                _manualResetEvent.Set();
+                AppDomain.CurrentDomain.DomainUnload += (s, e) => serviceHost.Close();
             }
         }
     }
