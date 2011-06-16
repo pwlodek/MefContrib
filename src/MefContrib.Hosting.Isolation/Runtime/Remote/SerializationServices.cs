@@ -12,10 +12,13 @@ namespace MefContrib.Hosting.Isolation.Runtime.Remote
         {
             var returnValue = new InvokeReturnValue();
 
-            using (var memoryStream = new MemoryStream())
+            if (value != null)
             {
-                Formatter.Serialize(memoryStream, value);
-                returnValue.Value = memoryStream.ToArray();
+                using (var memoryStream = new MemoryStream())
+                {
+                    Formatter.Serialize(memoryStream, value);
+                    returnValue.Value = memoryStream.ToArray();
+                }   
             }
 
             return returnValue;
