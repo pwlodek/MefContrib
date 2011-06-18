@@ -1,9 +1,14 @@
 namespace MefContrib.Hosting.Isolation
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition.Primitives;
     using System.Linq;
 
+    /// <summary>
+    /// Represents a catalog which can instantiate parts in isolation. Because of the isolation,
+    /// part has no other dependencies injected, and is created using default constructor.
+    /// </summary>
     public class IsolatingCatalog : ComposablePartCatalog
     {
         private readonly object _synchRoot = new object();
@@ -12,6 +17,11 @@ namespace MefContrib.Hosting.Isolation
 
         public IsolatingCatalog(ComposablePartCatalog interceptedCatalog)
         {
+            if (interceptedCatalog == null)
+            {
+                throw new ArgumentNullException("interceptedCatalog");
+            }
+
             _interceptedCatalog = interceptedCatalog;
         }
 

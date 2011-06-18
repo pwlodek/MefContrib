@@ -1,7 +1,10 @@
-using System;
-
 namespace MefContrib.Hosting.Isolation.Runtime.Activation
 {
+    using System;
+
+    /// <summary>
+    /// Represents a description of an activation host.
+    /// </summary>
     [Serializable]
     public class ActivationHostDescription : IEquatable<ActivationHostDescription>
     {
@@ -18,10 +21,19 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation
             Isolation = isolationLevel;
         }
 
+        /// <summary>
+        /// Id of the activation host.
+        /// </summary>
         public Guid Id { get; private set; }
 
+        /// <summary>
+        /// Name of the activation group this activation host belongs.
+        /// </summary>
         public string Group { get; private set; }
 
+        /// <summary>
+        /// Isolation level of this host.
+        /// </summary>
         public IsolationLevel Isolation { get; private set; }
 
         #region Equality Implementation

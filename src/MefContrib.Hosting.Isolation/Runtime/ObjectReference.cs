@@ -1,8 +1,11 @@
-using System;
-using MefContrib.Hosting.Isolation.Runtime.Activation;
-
 namespace MefContrib.Hosting.Isolation.Runtime
 {
+    using System;
+    using MefContrib.Hosting.Isolation.Runtime.Activation;
+
+    /// <summary>
+    /// Represents a clinet reference to the remote object.
+    /// </summary>
     [Serializable]
     public class ObjectReference : IEquatable<ObjectReference>
     {

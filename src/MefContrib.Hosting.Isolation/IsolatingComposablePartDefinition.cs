@@ -1,10 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition.Primitives;
-using System.ComponentModel.Composition.ReflectionModel;
-
 namespace MefContrib.Hosting.Isolation
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.Composition.Primitives;
+    using System.ComponentModel.Composition.ReflectionModel;
+
     public class IsolatingComposablePartDefinition : ComposablePartDefinition
     {
         private readonly ComposablePartDefinition _sourcePart;
