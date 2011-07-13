@@ -13,8 +13,12 @@ namespace MefContrib.Hosting.Isolation
     {
         private readonly object _synchRoot = new object();
         private readonly ComposablePartCatalog _interceptedCatalog;
-        private IQueryable<ComposablePartDefinition> _innerPartsQueryable;
+        private volatile IQueryable<ComposablePartDefinition> _innerPartsQueryable;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IsolatingCatalog"/> class.
+        /// </summary>
+        /// <param name="interceptedCatalog">Source catalog.</param>
         public IsolatingCatalog(ComposablePartCatalog interceptedCatalog)
         {
             if (interceptedCatalog == null)

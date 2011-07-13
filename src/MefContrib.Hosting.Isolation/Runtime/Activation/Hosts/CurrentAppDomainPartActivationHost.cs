@@ -4,6 +4,9 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
     using System.ServiceModel;
     using MefContrib.Hosting.Isolation.Runtime.Remote;
 
+    /// <summary>
+    /// Activation host which activates parts in the current app domain.
+    /// </summary>
     public class CurrentAppDomainPartActivationHost : PartActivationHostBase
     {
         private readonly ServiceHost _serviceHost;
@@ -19,7 +22,10 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         {
             ActivationHost.MarkFaulted(this, e.ExceptionObject as Exception);
         }
-        
+
+        /// <summary>
+        /// Starts the host.
+        /// </summary>
         public override void Start()
         {
             if (_serviceHost.State != CommunicationState.Created)
@@ -30,6 +36,9 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
             _serviceHost.Open();
         }
 
+        /// <summary>
+        /// Stops the host.
+        /// </summary>
         public override void Stop()
         {
             _serviceHost.Close();

@@ -65,7 +65,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
                 var activator = activatorHost.GetActivator();
                 var reference = activator.ActivateInstance(activatorHost.Description, assembly, typeName);
 
-                RemotingServices.CloseActivator(activator);
+                RemotingServices.TryCloseActivator(activator);
 
                 return ProxyFactory.GetFactory().CreateProxy(reference, contractType, additionalInterfaces);
             }
@@ -102,7 +102,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
                     activator.DeactivateInstance(objectReference);
                     objectReference.IsDisposed = true;
 
-                    RemotingServices.CloseActivator(activator);
+                    RemotingServices.TryCloseActivator(activator);
                 }
                 catch (Exception exception)
                 {
@@ -158,7 +158,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
                     methodInfo.Name,
                     SerializationServices.Serialize(arguments));
 
-                RemotingServices.CloseActivator(remoteActivator);
+                RemotingServices.TryCloseActivator(remoteActivator);
             }
             catch (Exception exception)
             {

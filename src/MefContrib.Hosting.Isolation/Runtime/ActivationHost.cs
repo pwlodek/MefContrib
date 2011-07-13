@@ -28,7 +28,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
                         {
                             var activator = partActivationHost.GetActivator();
                             activator.HeartBeat();
-                            RemotingServices.CloseActivator(activator);
+                            RemotingServices.TryCloseActivator(activator);
                         }
                         catch (Exception exception)
                         {
@@ -87,7 +87,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
                     var remoteActivator = host.GetActivator();
                     remoteActivator.HeartBeat();
 
-                    RemotingServices.CloseActivator(remoteActivator);
+                    RemotingServices.TryCloseActivator(remoteActivator);
                 }
                 catch (Exception)
                 {
@@ -220,7 +220,7 @@ namespace MefContrib.Hosting.Isolation.Runtime
                 throw new ActivationHostException("Cannot start host.", host.Description);
             }
 
-            RemotingServices.CloseActivator(activator);
+            RemotingServices.TryCloseActivator(activator);
         }
     }
 }

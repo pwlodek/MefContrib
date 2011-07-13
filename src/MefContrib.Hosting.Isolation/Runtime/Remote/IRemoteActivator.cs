@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.ServiceModel;
-using MefContrib.Hosting.Isolation.Runtime.Activation;
-
 namespace MefContrib.Hosting.Isolation.Runtime.Remote
 {
+    using System.Collections.Generic;
+    using System.ServiceModel;
+    using MefContrib.Hosting.Isolation.Runtime.Activation;
+
     /// <summary>
-    /// remote activator
+    /// Remote activator which is responsible for activating\deactivating instances as well as invoking methods on it.
     /// </summary>
     [ServiceContract]
     public interface IRemoteActivator

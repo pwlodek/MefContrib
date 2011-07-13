@@ -3,6 +3,9 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
     using System;
     using MefContrib.Hosting.Isolation.Runtime.Remote;
 
+    /// <summary>
+    /// Activation host which activates parts in a separate app domain.
+    /// </summary>
     public class NewAppDomainPartActivationHost : PartActivationHostBase
     {
         private readonly AppDomain _domain;
@@ -23,13 +26,19 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
                 ActivationHost.MarkFaulted(this, e.ExceptionObject as Exception);
             }
         }
-        
+
+        /// <summary>
+        /// Starts the host.
+        /// </summary>
         public override void Start()
         {
             var t = new Trampoline(Address);
             _domain.DoCallBack(t.StartCore);
         }
 
+        /// <summary>
+        /// Stops the host.
+        /// </summary>
         public override void Stop()
         {
             AppDomain.Unload(_domain);

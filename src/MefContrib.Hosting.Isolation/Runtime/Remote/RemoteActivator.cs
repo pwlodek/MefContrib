@@ -7,6 +7,9 @@ namespace MefContrib.Hosting.Isolation.Runtime.Remote
     using System.ServiceModel;
     using MefContrib.Hosting.Isolation.Runtime.Activation;
 
+    /// <summary>
+    /// Default implementation of the <see cref="IRemoteActivator"/> interface.
+    /// </summary>
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerCall, UseSynchronizationContext = false, ConcurrencyMode = ConcurrencyMode.Reentrant)]
     public class RemoteActivator : IRemoteActivator
     {

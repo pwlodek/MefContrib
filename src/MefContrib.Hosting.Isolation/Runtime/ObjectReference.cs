@@ -9,8 +9,12 @@ namespace MefContrib.Hosting.Isolation.Runtime
     [Serializable]
     public class ObjectReference : IEquatable<ObjectReference>
     {
-        private Guid _guid;
+        private Guid _guid = Guid.NewGuid();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectReference"/> class.
+        /// </summary>
+        /// <param name="description"></param>
         public ObjectReference(ActivationHostDescription description)
         {
             if (description == null)
@@ -19,7 +23,6 @@ namespace MefContrib.Hosting.Isolation.Runtime
             }
             
             Description = description;
-            _guid = Guid.NewGuid();
         }
 
         /// <summary>

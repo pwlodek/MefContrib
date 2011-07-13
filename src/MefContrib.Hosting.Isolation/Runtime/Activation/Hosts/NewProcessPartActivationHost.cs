@@ -2,6 +2,9 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
 {
     using System.Diagnostics;
 
+    /// <summary>
+    /// Activation host which activates parts in a separate process.
+    /// </summary>
     public class NewProcessPartActivationHost : PartActivationHostBase
     {
         private readonly Process _process;
@@ -11,7 +14,10 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
         {
             _process = new Process();
         }
-        
+
+        /// <summary>
+        /// Starts the host.
+        /// </summary>
         public override void Start()
         {
             _process.StartInfo.Arguments = Address + " " + Process.GetCurrentProcess().Id;
@@ -21,6 +27,9 @@ namespace MefContrib.Hosting.Isolation.Runtime.Activation.Hosts
             _process.Start();
         }
 
+        /// <summary>
+        /// Stops the host.
+        /// </summary>
         public override void Stop()
         {
             _process.Kill();
