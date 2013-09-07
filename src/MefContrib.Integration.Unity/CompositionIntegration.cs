@@ -21,6 +21,7 @@ namespace MefContrib.Integration.Unity
 
         private AggregateCatalog aggregateCatalog;
         private ExportProvider[] providers;
+        private CatalogExportProvider catalogExportProvider;
         private CompositionContainer compositionContainer;
         private readonly bool isThreadSafe;
 
@@ -77,8 +78,8 @@ namespace MefContrib.Integration.Unity
             Context.Strategies.AddNew<ComposeStrategy>(UnityBuildStage.Initialization);
 
             // Policies
-            Context.Policies.Set<IBuildPlanPolicy>(
-                new LazyResolveBuildPlanPolicy(), typeof(Lazy<>));
+            Context.Policies.Set<IBuildPlanPolicy>(new LazyResolveBuildPlanPolicy(), typeof(Lazy<>));
+            Context.Policies.Set<IBuildPlanPolicy>(new LazyWithMetadataResolveBuildPlanPolicy(), typeof(Lazy<,>));
 
             Context.Policies.SetDefault<ICompositionContainerPolicy>(
                 new CompositionContainerPolicy(compositionContainer));
@@ -90,7 +91,7 @@ namespace MefContrib.Integration.Unity
             // Important: the catalog is wrapped with CatalogExportProvider which is
             // then added as a LAST catalog, this ensures that when querying Unity/MEF
             // for a single component, Unity components will always take precedence
-            var catalogExportProvider = new CatalogExportProvider(this.aggregateCatalog, this.isThreadSafe);
+            catalogExportProvider = new CatalogExportProvider(this.aggregateCatalog, this.isThreadSafe);
             var providerList = new List<ExportProvider>(this.providers);
             providerList.Add(catalogExportProvider);
             var container = new CompositionContainer(null, this.isThreadSafe, providerList.ToArray());
@@ -154,6 +155,9 @@ namespace MefContrib.Integration.Unity
         /// </summary>
         public void Dispose()
         {
+            if(catalogExportProvider != null)
+                catalogExportProvider.Dispose();
+
             if (compositionContainer != null)
                 compositionContainer.Dispose();
 

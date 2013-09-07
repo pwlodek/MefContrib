@@ -211,5 +211,27 @@ namespace MefContrib.Integration.Unity.Tests
             Assert.That(MefSingletonComponent.Counter, Is.EqualTo(1));
             Assert.That(singletonComponent2, Is.SameAs(singletonComponent));
         }
+
+        [Test]
+        public void MefDisposesMefComponentTest()
+        {
+            // Setup
+            var unityContainer = new UnityContainer();
+            var assemblyCatalog = new AssemblyCatalog(Assembly.GetExecutingAssembly());
+
+            // Register catalog and types
+            unityContainer.RegisterCatalog(assemblyCatalog);
+            unityContainer.RegisterType<IUnityOnlyComponent, UnityOnlyComponent1>();
+
+            // Test
+            var container = unityContainer.Resolve<CompositionContainer>();
+            var mefComponentDisposable = container.GetExportedValue<MefComponentDisposable>();
+            Assert.That(mefComponentDisposable, Is.Not.Null);
+            Assert.That(mefComponentDisposable.GetType(), Is.EqualTo(typeof(MefComponentDisposable)));
+
+            unityContainer.Dispose();
+
+            Assert.IsTrue(mefComponentDisposable.Disposed);
+        }
     }
 }

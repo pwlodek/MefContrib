@@ -3,6 +3,8 @@ using System.ComponentModel.Composition;
 
 namespace MefContrib.Integration.Unity.Tests
 {
+    using System.Collections.Generic;
+
     public interface IMefComponent
     {
         void Foo();
@@ -30,6 +32,22 @@ namespace MefContrib.Integration.Unity.Tests
     {
         public void Foo()
         {
+        }
+    }
+
+    [Export]
+    public class MefComponentDisposable : IDisposable
+    {
+        public bool Disposed { get; private set; }
+
+        public MefComponentDisposable()
+        {
+            
+        }
+        
+        public void Dispose()
+        {
+            this.Disposed = true;
         }
     }
 
@@ -117,5 +135,52 @@ namespace MefContrib.Integration.Unity.Tests
         public IUnityOnlyComponent UnityComponent { get; set; }
 
         public IMefComponent MefComponent { get; set; }
+    }
+
+    // to test resolution with metadata
+
+    public interface IPartWithTextMetadata
+    {
+        void HelloWorld(string message);
+    }
+
+    [Export(typeof(IPartWithTextMetadata))]
+    [ExportMetadata("World", "Earth")]
+    public class HelloWorldDispatcher : IPartWithTextMetadata
+    {
+        public void HelloWorld(string message)
+        {
+            Console.WriteLine(message);
+        }
+    }
+
+    public interface IPartWithStronglyTypedMetadata
+    {
+    }
+
+    [Export(typeof(IPartWithStronglyTypedMetadata))]
+    [MyStronglyTypedMetadata(ListOfNames = new[] { "Element One", "Element Two" }, MetadataIdentifier = 5)]
+    public class StronglyTypedHelloWorldDispatcher : IPartWithStronglyTypedMetadata
+    {
+        public void HelloWorld(string message)
+        {
+            Console.WriteLine(message);
+        }
+    }
+
+    public interface IMyStronglyTypedMetadataAttribute
+    {
+        int MetadataIdentifier { get;  }
+
+        string[] ListOfNames { get; }
+    }
+
+    [MetadataAttribute]
+    [AttributeUsage(AttributeTargets.Class)]
+    public class MyStronglyTypedMetadataAttribute : Attribute, IMyStronglyTypedMetadataAttribute
+    {
+        public int MetadataIdentifier { get; set; }
+
+        public string[] ListOfNames { get; set; }
     }
 }

@@ -89,6 +89,7 @@
     <Compile Include="Strategies\EnumerableResolutionStrategy.cs" />
     <Compile Include="Strategies\ICompositionContainerPolicy.cs" />
     <Compile Include="Strategies\LazyResolveBuildPlanPolicy.cs" />
+    <Compile Include="Strategies\LazyWithMetadataResolveBuildPlanPolicy.cs" />
     <Compile Include="UnityContainerAdapter.cs" />
     <Compile Include="UnityContainerExtensions.cs" />
   </ItemGroup>

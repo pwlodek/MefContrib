@@ -28,8 +28,15 @@ namespace MefContrib.Integration.Unity.Strategies
             var lazyExport = ContainerServices.Resolve(container, buildKey.Type, buildKey.Name);
             if (lazyExport != null)
             {
-                context.Existing = lazyExport.Value;
-                context.BuildComplete = true;
+                if (context.BuildKey.Type.IsGenericType && context.BuildKey.Type.GetGenericTypeDefinition() == typeof(Lazy<,>))
+                {
+                    context.Existing = lazyExport;
+                }
+                else
+                {
+                    context.Existing = lazyExport.Value;
+                    context.BuildComplete = true;
+                }
             }
         }
     }

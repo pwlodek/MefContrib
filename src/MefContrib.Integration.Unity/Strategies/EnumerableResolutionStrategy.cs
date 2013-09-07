@@ -23,6 +23,9 @@ namespace MefContrib.Integration.Unity.Strategies
         private static readonly MethodInfo GenericResolveLazyEnumerableMethod =
             typeof(EnumerableResolutionStrategy).GetMethod("ResolveLazyEnumerable", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly);
 
+        private static readonly MethodInfo GenericResolveLazyWithMetadataEnumerableMethod =
+            typeof(EnumerableResolutionStrategy).GetMethod("ResolveLazyWithMetadataEnumerable", BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly);
+
         /// <summary>
         /// Do the PreBuildUp stage of construction. This is where the actual work is performed.
         /// </summary>
@@ -40,6 +43,12 @@ namespace MefContrib.Integration.Unity.Strategies
                     typeToBuild = GetTypeToBuild(typeToBuild);
                     resolverMethod = GenericResolveLazyEnumerableMethod.MakeGenericMethod(typeToBuild);
                 }
+                else if (IsResolvingLazyWithMetadata(typeToBuild))
+                {
+                    Type metaDataType = GetMetadataType(typeToBuild);
+                    typeToBuild = GetTypeToBuild(typeToBuild);                    
+                    resolverMethod = GenericResolveLazyWithMetadataEnumerableMethod.MakeGenericMethod(typeToBuild, metaDataType);
+                }
                 else
                 {
                     resolverMethod = GenericResolveEnumerableMethod.MakeGenericMethod(typeToBuild);
@@ -56,6 +65,11 @@ namespace MefContrib.Integration.Unity.Strategies
             return type.GetGenericArguments()[0];
         }
 
+        private static Type GetMetadataType(Type type)
+        {
+            return type.GetGenericArguments()[1];
+        }
+
         private static bool IsResolvingIEnumerable(Type type)
         {
             return type.IsGenericType &&
@@ -66,6 +80,34 @@ namespace MefContrib.Integration.Unity.Strategies
         {
             return type.IsGenericType &&
                    type.GetGenericTypeDefinition() == typeof(Lazy<>);
+        }
+
+        private static bool IsResolvingLazyWithMetadata(Type type)
+        {
+            return type.IsGenericType &&
+                   type.GetGenericTypeDefinition() == typeof(Lazy<,>);
+        }
+
+        private static object ResolveLazyWithMetadataEnumerable<T, TMetadata>(IBuilderContext context)
+        {
+            var container = context.NewBuildUp<IUnityContainer>();
+            var typeToBuild = typeof (T);
+            var typeWrapper = typeof (Lazy<T, TMetadata>);
+            var results = ResolveAll(container, typeToBuild, typeWrapper).OfType<Lazy<T, TMetadata>>().ToList();
+
+            // Add parts from the MEF
+            var containerPolicy = context.Policies.Get<ICompositionContainerPolicy>(null);
+            if (containerPolicy != null)
+            {
+                var parts = ContainerServices.ResolveAllWithMetadata<TMetadata>(
+                    containerPolicy.Container,
+                    typeToBuild,                    
+                    null);
+
+                results.AddRange(parts.Select(innerPart => new Lazy<T, TMetadata>(() => (T)innerPart.Value, (TMetadata)innerPart.Metadata)));    
+            }
+
+            return results;
         }
 
         private static object ResolveLazyEnumerable<T>(IBuilderContext context)

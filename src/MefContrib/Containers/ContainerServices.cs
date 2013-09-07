@@ -38,6 +38,11 @@ namespace MefContrib.Containers
 
             var exports = exportProvider.GetExports(type, null, name);
 
+            if (type.GetGenericArguments().Count() > 1)
+            {
+                exports = exportProvider.GetExports(type.GetGenericArguments()[0], type.GetGenericArguments()[1], name);
+            }
+
             if (exports.Count() == 0)
                 return null;
 
@@ -98,6 +103,57 @@ namespace MefContrib.Containers
                 }
 
                 list.Add(export);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Resolves an collection of objects wrapped inside <see cref="Lazy{T,TMetadata}"/>
+        /// from an <see cref="ExportProvider"/>.
+        /// </summary>
+        /// <param name="exportProvider">Export provider.</param>
+        /// <param name="type">Type to be resolved.</param>
+        /// <param name="metadataType">The metadata type.</param>
+        /// <param name="name">Optional name.</param>
+        /// <returns>Resolved collection of lazy instances or null, if no instance has been found.</returns>
+        /// <remarks>
+        /// Does not resolve instances which are provided by means of
+        /// <see cref="FactoryExportProvider"/>.
+        /// </remarks>
+        public static IEnumerable<Lazy<object, object>> ResolveAllWithMetadata<TMetadata>(ExportProvider exportProvider, Type type, string name)
+        {
+            if (exportProvider == null)
+            {
+                throw new ArgumentNullException("exportProvider");
+            }
+
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+
+            var exports = exportProvider.GetExports(type, typeof(TMetadata), name);
+
+            if (exports.Count() == 0)
+                return Enumerable.Empty<Lazy<object, object>>();
+
+            var list = new List<Lazy<object, object>>();
+
+            foreach (var export in exports)
+            {                
+                var lazyExportMetadata = export.Metadata as IDictionary<string, object>;
+                if (lazyExportMetadata != null &&
+                    lazyExportMetadata.ContainsKey(FactoryExportDefinition.IsFactoryExportMetadataName) &&
+                    true.Equals(lazyExportMetadata[FactoryExportDefinition.IsFactoryExportMetadataName]))
+                {
+                    continue;
+                }
+
+                if (export.Metadata is TMetadata)
+                {
+                    list.Add(export);
+                }
             }
 
             return list;
